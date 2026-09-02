@@ -10,16 +10,88 @@
             background-color: #ffffff;
             overflow: hidden;
             display: flex;
+            font-family: sans-serif;
         }
 
         .sidebar {
             width: 260px;
             height: 100%;
             background-color: #18181b;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .top-bar {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid #e4e4e7;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: #18181b;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .toggle-btn:hover {
+            background-color: #f4f4f5;
+        }
+
+        .profile-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e4e4e7;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #52525b;
+        }
+
+        .profile-btn:hover {
+            background-color: #d4d4d8;
         }
     </style>
 </head>
 <body>
-    <div class="sidebar"></div>
+    <div class="sidebar" id="sidebar"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <button class="toggle-btn" id="toggleBtn" onclick="toggleSidebar()">☰</button>
+            <button class="profile-btn">P</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
 </body>
 </html>
