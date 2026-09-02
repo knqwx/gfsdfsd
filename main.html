@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow Study</title>
+    <!-- Подключаем библиотеку Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -1204,6 +1206,82 @@
     <div class="toast-container" id="toast-container"></div>
 
 <script>
+    // Google Identity Services (GIS) конфигурация
+    const CLIENT_ID = 'ТВОЙ_CLIENT_ID'; // Замени на свой Client ID из Google Cloud Console
+    const SCOPES = 'https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.coursework.me.readonly';
+
+    let tokenClient;
+    let accessToken = null;
+
+    function initGoogleAuth() {
+        if (typeof google === 'undefined' || !google.accounts) return;
+        tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: (response) => {
+                if (response.error) {
+                    console.error(response);
+                    showToast('Error', 'Google Authorization failed', 'error');
+                    return;
+                }
+                accessToken = response.access_token;
+                console.log('Успешно авторизовались!');
+                
+                // Переводим интеграцию Google Classroom в состояние подключено
+                const integrations = getIntegrations();
+                integrations.googleClassroom = true;
+                saveIntegrations(integrations);
+                updateIntegrationModalUI();
+                showToast('Success', 'Connected to Google Classroom!', 'success');
+
+                // Загружаем курсы
+                fetchClassroomCourses();
+            },
+        });
+    }
+
+    function handleGoogleAuthClick() {
+        const integrations = getIntegrations();
+        if (integrations.googleClassroom && accessToken) {
+            // Если уже подключено, можно отключить
+            integrations.googleClassroom = false;
+            accessToken = null;
+            saveIntegrations(integrations);
+            updateIntegrationModalUI();
+            showToast('Info', 'Disconnected from Google Classroom.', 'info');
+            return;
+        }
+
+        if (tokenClient) {
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+            showToast('Error', 'Google Auth not initialized yet.', 'error');
+        }
+    }
+
+    async function fetchClassroomCourses() {
+        if (!accessToken) return;
+
+        try {
+            let res = await fetch('https://classroom.googleapis.com/v1/courses', {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            });
+            let data = await res.json();
+            console.log('Мои курсы:', data.courses);
+            if (data.courses && data.courses.length > 0) {
+                showToast('Classroom', `Loaded ${data.courses.length} courses successfully!`, 'success');
+            }
+        } catch (err) {
+            console.error('Ошибка при получении курсов:', err);
+        }
+    }
+
+    window.onload = () => {
+        initGoogleAuth();
+    };
+
     function showToast(title, message, type = 'success', duration = 4000) {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -1282,9 +1360,9 @@
                         <div>
                             <span style="font-size: 0.75rem; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">Google Classroom</span>
                             <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a; margin-top: 4px;">Advanced Mathematics & Algorithms</h3>
-                            <p style="font-size: 0.8rem; color: #64748b;">Synced successfully • Next assignment due tomorrow</p>
+                            <p style="font-size: 0.8rem; color: #64748b;">Synced successfully via GIS • Real-time API connected</p>
                         </div>
-                        <button class="btn-secondary" onclick="showToast('Info', 'Opening class workspace...', 'info')">Open</button>
+                        <button class="btn-secondary" onclick="fetchClassroomCourses()">Sync / Refresh</button>
                     </div>`;
             }
             if (integrations.human) {
@@ -1363,15 +1441,14 @@
             const integrations = getIntegrations();
 
             if (service === 'Google Classroom') {
-                integrations.googleClassroom = !integrations.googleClassroom;
-                saveIntegrations(integrations);
-                showToast(integrations.googleClassroom ? 'Success' : 'Info', integrations.googleClassroom ? 'Connected to Google Classroom!' : 'Disconnected from Google Classroom.', integrations.googleClassroom ? 'success' : 'info');
+                // Запускаем аутентификацию через GIS
+                handleGoogleAuthClick();
             } else if (service === 'Human') {
                 integrations.human = !integrations.human;
                 saveIntegrations(integrations);
                 showToast(integrations.human ? 'Success' : 'Info', integrations.human ? 'Connected to Human!' : 'Disconnected from Human.', integrations.human ? 'success' : 'info');
+                updateIntegrationModalUI();
             }
-            updateIntegrationModalUI();
         });
     });
 
