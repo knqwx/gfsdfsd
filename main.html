@@ -19,7 +19,6 @@
             overflow: hidden;
         }
 
-        /* Dark Sidebar */
         .sidebar {
             width: 240px;
             height: 100vh;
@@ -73,7 +72,6 @@
             display: inline;
         }
 
-        /* Toggle Button */
         .toggle-sidebar-btn {
             background: none;
             border: none;
@@ -102,7 +100,6 @@
             stroke-linejoin: round;
         }
 
-        /* Navigation */
         .nav-list {
             list-style: none;
             display: flex;
@@ -130,12 +127,7 @@
             text-align: left;
         }
 
-        .nav-item:hover {
-            color: #ffffff;
-            background: #27272a;
-        }
-
-        .nav-item.active {
+        .nav-item:hover, .nav-item.active {
             color: #ffffff;
             background: #27272a;
         }
@@ -162,7 +154,6 @@
             padding-top: 0.75rem;
         }
 
-        /* Main Workspace Section */
         .main-wrapper {
             flex: 1;
             display: flex;
@@ -171,7 +162,6 @@
             background-color: #ffffff;
         }
 
-        /* Top Header Bar */
         .top-header {
             height: 64px;
             display: flex;
@@ -247,7 +237,6 @@
             stroke-linejoin: round;
         }
 
-        /* Notifications Dropdown */
         .notifications-dropdown {
             position: absolute;
             top: 48px;
@@ -256,7 +245,7 @@
             background: #ffffff;
             border: 1px solid #e4e4e7;
             border-radius: 10px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             display: none;
             flex-direction: column;
             z-index: 50;
@@ -282,7 +271,6 @@
             text-align: center;
         }
 
-        /* Profile Button */
         .profile-btn {
             display: flex;
             align-items: center;
@@ -341,7 +329,6 @@
             overflow-y: auto;
         }
 
-        /* Views */
         .view-section {
             display: none;
             flex-direction: column;
@@ -352,7 +339,6 @@
             display: flex;
         }
 
-        /* Toast Notifications Container (Top-Right) */
         .toast-container {
             position: fixed;
             top: 24px;
@@ -369,7 +355,7 @@
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -441,7 +427,6 @@
         .toast.error .toast-progress-fill { background: #ef4444; }
         .toast.info .toast-progress-fill { background: #3b82f6; }
 
-        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -464,13 +449,12 @@
             pointer-events: auto;
         }
 
-        /* Settings Modal Box */
         .settings-modal {
             width: 760px;
             height: 540px;
             background-color: #ffffff;
             border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
             display: flex;
             overflow: hidden;
             border: 1px solid #e4e4e7;
@@ -483,7 +467,6 @@
             transform: scale(1);
         }
 
-        /* Modal Sidebar Tabs */
         .modal-sidebar {
             width: 220px;
             background-color: #f8fafc;
@@ -541,7 +524,6 @@
             stroke-linejoin: round;
         }
 
-        /* Modal Body Content */
         .modal-content-area {
             flex: 1;
             padding: 1.75rem 2rem;
@@ -629,13 +611,6 @@
             border-color: #0f172a;
         }
 
-        .setting-input[readonly] {
-            background-color: #f1f5f9;
-            color: #64748b;
-            cursor: not-allowed;
-            border-color: #e2e8f0;
-        }
-
         .action-row {
             display: flex;
             align-items: center;
@@ -676,7 +651,6 @@
             background: #e2e8f0;
         }
 
-        /* Custom Inner Modal Overlay */
         .custom-dialog-overlay {
             position: absolute;
             top: 0;
@@ -742,7 +716,6 @@
             background: #1e293b;
         }
 
-        /* Pricing Subscriptions Grid & Toggle */
         .billing-toggle {
             display: flex;
             background: #f1f5f9;
@@ -782,9 +755,6 @@
             color: #15803d;
             padding: 1px 5px;
             border-radius: 10px;
-            letter-spacing: -0.01em;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            pointer-events: none;
         }
 
         .subs-grid {
@@ -890,7 +860,6 @@
         </header>
 
         <section class="content" id="main-content-area">
-            <!-- Dashboard View -->
             <div class="view-section active" id="view-dashboard">
                 <div>
                     <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">Dashboard</h1>
@@ -900,7 +869,6 @@
         </section>
     </main>
 
-    <!-- Settings Modal -->
     <div class="modal-overlay" id="settings-modal-overlay">
         <div class="settings-modal">
             <aside class="modal-sidebar">
@@ -937,7 +905,6 @@
                     <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
 
-                <!-- Panel: General -->
                 <div class="tab-panel active" id="tab-general">
                     <div class="panel-header">
                         <h2>General Settings</h2>
@@ -945,7 +912,6 @@
                     </div>
                 </div>
 
-                <!-- Panel: Account -->
                 <div class="tab-panel" id="tab-account">
                     <div class="panel-header">
                         <h2>Account Profile</h2>
@@ -953,7 +919,7 @@
                     </div>
                     <div class="setting-group">
                         <label class="setting-label">User ID</label>
-                        <input type="text" class="setting-input" id="user-id-input" placeholder="User ID" readonly>
+                        <input type="text" class="setting-input" id="user-id-input" placeholder="User ID">
                     </div>
                     <div class="setting-group">
                         <label class="setting-label">Username</label>
@@ -982,7 +948,6 @@
                     </div>
                 </div>
 
-                <!-- Panel: Appearance -->
                 <div class="tab-panel" id="tab-appearance">
                     <div class="panel-header">
                         <h2>Appearance</h2>
@@ -990,7 +955,6 @@
                     </div>
                 </div>
 
-                <!-- Panel: Notifications -->
                 <div class="tab-panel" id="tab-notifications">
                     <div class="panel-header">
                         <h2>Notification Preferences</h2>
@@ -998,7 +962,6 @@
                     </div>
                 </div>
 
-                <!-- Panel: Admin DB -->
                 <div class="tab-panel" id="tab-admin">
                     <div class="panel-header">
                         <h2>Admin Database</h2>
@@ -1010,7 +973,6 @@
         </div>
     </div>
 
-    <!-- Subscriptions Modal Overlay -->
     <div class="modal-overlay" id="subscriptions-modal-overlay">
         <div class="settings-modal" style="width: 700px; height: auto; padding: 2rem; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem;">
@@ -1023,7 +985,6 @@
                 </button>
             </div>
 
-            <!-- Billing Toggle -->
             <div class="billing-toggle">
                 <button class="toggle-btn active" data-period="monthly">Monthly</button>
                 <button class="toggle-btn" data-period="yearly">
@@ -1033,7 +994,6 @@
             </div>
 
             <div class="subs-grid">
-                <!-- Starter Plan -->
                 <div class="sub-card">
                     <h4>Starter</h4>
                     <div class="sub-price">
@@ -1043,7 +1003,6 @@
                     <div class="sub-desc">Basic core tools for standard organization and simple study tracking.</div>
                     <button class="btn-primary" style="margin-top: auto;" onclick="showToast('Success', 'Subscribed to Starter plan!', 'success')">Choose Starter</button>
                 </div>
-                <!-- Pro Plan -->
                 <div class="sub-card">
                     <h4>Pro</h4>
                     <div class="sub-price">
@@ -1053,7 +1012,6 @@
                     <div class="sub-desc">Essential features for regular users and enhanced productivity.</div>
                     <button class="btn-primary" style="margin-top: auto;" onclick="showToast('Success', 'Subscribed to Pro plan!', 'success')">Choose Pro</button>
                 </div>
-                <!-- Advanced Plan -->
                 <div class="sub-card popular">
                     <h4>Advanced</h4>
                     <div class="sub-price">
@@ -1067,16 +1025,13 @@
         </div>
     </div>
 
-    <!-- Custom Dialog Modal -->
     <div class="custom-dialog-overlay" id="custom-dialog-overlay">
         <div class="custom-dialog" id="custom-dialog-box"></div>
     </div>
 
-    <!-- Toast Notifications Container -->
     <div class="toast-container" id="toast-container"></div>
 
 <script>
-    // Toast Notification System (Top-Right)
     function showToast(title, message, type = 'success', duration = 4000) {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -1138,7 +1093,6 @@
     const customDialogOverlay = document.getElementById('custom-dialog-overlay');
     const customDialogBox = document.getElementById('custom-dialog-box');
 
-    // Notifications Dropdown Toggle
     const notificationsBtn = document.getElementById('notifications-btn');
     const notificationsDropdown = document.getElementById('notifications-dropdown');
 
@@ -1186,7 +1140,7 @@
         if (displayUsername) displayUsername.textContent = cleanName;
         if (avatarInitial) avatarInitial.textContent = cleanName.charAt(0).toUpperCase();
         if (usernameInput) usernameInput.value = cleanName;
-        if (userIdInput) userIdInput.value = `#${rawId}`;
+        if (userIdInput) userIdInput.value = rawId;
         if (emailMaskedDesc) emailMaskedDesc.textContent = maskEmail(email);
 
         if (toggle2faBtn && faStatusDesc) {
@@ -1213,6 +1167,8 @@
         const savedUser = localStorage.getItem('flowstudy_username');
         if (savedUser) {
             applyUserData(savedUser, 1, '', false);
+        } else {
+            applyUserData('User', '1', '', false);
         }
     }
 
@@ -1236,7 +1192,23 @@
         });
     }
 
-    // Custom Dialog Helper
+    if (userIdInput) {
+        userIdInput.addEventListener('input', (e) => {
+            const newId = e.target.value.trim() || '1';
+            
+            if (session) {
+                const users = getUsersDB();
+                const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
+                session.id = newId;
+                if (userIdx !== -1) users[userIdx].id = newId;
+                
+                localStorage.setItem('flowstudy_session', JSON.stringify(session));
+                saveUsersDB(users);
+            }
+            applyUserData(session ? session.username : 'User', newId, session ? session.email : '', session ? session.is2fa : false);
+        });
+    }
+
     function showCustomDialog(htmlContent, onSubmit) {
         customDialogBox.innerHTML = htmlContent;
         customDialogOverlay.classList.add('active');
@@ -1257,7 +1229,6 @@
         };
     }
 
-    // Change Email Flow (With Email Code Verification)
     let pendingNewEmail = '';
     let emailVerificationCode = '';
 
@@ -1315,7 +1286,6 @@
         });
     }
 
-    // Change Password Dialog
     if (openChangePasswordBtn) {
         openChangePasswordBtn.addEventListener('click', () => {
             showCustomDialog(`
@@ -1324,9 +1294,6 @@
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <input type="password" class="setting-input" id="dialog-old-pass" placeholder="Current password">
                     <input type="password" class="setting-input" id="dialog-new-pass" placeholder="New password (min 4 chars)">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-                    <a href="#" id="dialog-forgot-link" style="font-size: 0.75rem; color: #2563eb; text-decoration: none;">Forgot Password?</a>
                 </div>
                 <div class="custom-dialog-actions">
                     <button class="btn-secondary dialog-cancel">Cancel</button>
@@ -1348,7 +1315,6 @@
         });
     }
 
-    // 2FA Toggle Dialog
     if (toggle2faBtn) {
         toggle2faBtn.addEventListener('click', () => {
             const isCurrentlyEnabled = session && session.is2fa;
@@ -1368,7 +1334,6 @@
                         showToast('Error', 'Password is required.', 'error');
                         return false;
                     }
-                    session.is2fa = false;
                     updateSession2FA(false);
                 });
             } else {
@@ -1386,7 +1351,6 @@
                         showToast('Error', 'Password is required.', 'error');
                         return false;
                     }
-                    session.is2fa = true;
                     updateSession2FA(true);
                 });
             }
@@ -1441,10 +1405,6 @@
         adminUsersList.querySelectorAll('.delete-user-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idToDelete = cleanId(e.target.getAttribute('data-id'));
-                if (idToDelete.toLowerCase() === 'z') {
-                    showToast('Action Denied', 'User with ID "z" cannot be deleted.', 'error');
-                    return;
-                }
                 let usersBefore = getUsersDB();
                 let updatedUsers = usersBefore.filter(u => cleanId(u.id).toLowerCase() !== idToDelete.toLowerCase());
                 saveUsersDB(updatedUsers);
@@ -1470,7 +1430,6 @@
         });
     }
 
-    // Sidebar Toggle
     const sidebar = document.getElementById('sidebar');
     const toggleBtn = document.getElementById('toggle-btn');
     const toggleIcon = document.getElementById('toggle-icon');
@@ -1486,7 +1445,6 @@
         });
     }
 
-    // Navigation switching (Dashboard view)
     const navItems = document.querySelectorAll('.nav-list .nav-item');
     const viewSections = document.querySelectorAll('.view-section');
 
@@ -1507,7 +1465,6 @@
         });
     });
 
-    // Settings Modal Open/Close
     const modalOverlay = document.getElementById('settings-modal-overlay');
     const openSettingsBtn = document.getElementById('open-settings-btn');
     const profileSettingsBtn = document.getElementById('profile-settings-btn');
@@ -1524,7 +1481,6 @@
         modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
     }
 
-    // Subscriptions Modal Open/Close
     const subscriptionsModalOverlay = document.getElementById('subscriptions-modal-overlay');
     const openSubscriptionsBtn = document.getElementById('open-subscriptions-btn');
     const closeSubscriptionsBtn = document.getElementById('close-subscriptions-btn');
@@ -1539,7 +1495,6 @@
         subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
     }
 
-    // Billing Toggle for Pricing Plans (Monthly / Yearly)
     const billingToggleButtons = document.querySelectorAll('.billing-toggle .toggle-btn');
     billingToggleButtons.forEach(button => {
         button.addEventListener('click', () => {
