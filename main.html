@@ -166,11 +166,47 @@
             height: 64px;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: space-between;
             padding: 0 2rem;
-            gap: 0.75rem;
             border-bottom: 1px solid #eaeaea;
             background-color: #ffffff;
+        }
+
+        .header-left-cluster {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-right-cluster {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-clock {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #334155;
+            background: #f1f5f9;
+            padding: 0.4rem 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .header-clock svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            color: #64748b;
         }
 
         .header-subscriptions-btn {
@@ -841,28 +877,37 @@
 
     <main class="main-wrapper">
         <header class="top-header">
-            <button class="header-subscriptions-btn" id="open-subscriptions-btn">
-                <svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
-                <span>Subscriptions</span>
-            </button>
-
-            <div class="icon-btn-wrapper">
-                <button class="icon-btn" id="notifications-btn" aria-label="Notifications">
-                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+            <div class="header-left-cluster">
+                <button class="header-subscriptions-btn" id="open-subscriptions-btn">
+                    <svg viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                    <span>Subscriptions</span>
                 </button>
-                <div class="notifications-dropdown" id="notifications-dropdown">
-                    <div class="notifications-header">Notifications</div>
-                    <div class="notifications-body">No new notifications</div>
-                </div>
             </div>
 
-            <button class="profile-btn" id="profile-settings-btn">
-                <div class="avatar" id="avatar-initial">U</div>
-                <div class="profile-info">
-                    <span class="profile-name" id="display-username">User</span>
-                    <span class="profile-role" id="display-role">Student</span>
+            <div class="header-right-cluster">
+                <div class="header-clock" id="live-clock">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span id="clock-time">00:00:00</span>
                 </div>
-            </button>
+
+                <div class="icon-btn-wrapper">
+                    <button class="icon-btn" id="notifications-btn" aria-label="Notifications">
+                        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    </button>
+                    <div class="notifications-dropdown" id="notifications-dropdown">
+                        <div class="notifications-header">Notifications</div>
+                        <div class="notifications-body">No new notifications</div>
+                    </div>
+                </div>
+
+                <button class="profile-btn" id="profile-settings-btn">
+                    <div class="avatar" id="avatar-initial">U</div>
+                    <div class="profile-info">
+                        <span class="profile-name" id="display-username">User</span>
+                        <span class="profile-role" id="display-role">Student</span>
+                    </div>
+                </button>
+            </div>
         </header>
 
         <section class="content" id="main-content-area">
@@ -1041,495 +1086,509 @@
 
     <div class="toast-container" id="toast-container"></div>
 
-<script>
-    function showToast(title, message, type = 'success', duration = 4000) {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-
-        let iconSvg = '';
-        if (type === 'success') {
-            iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
-        } else if (type === 'error') {
-            iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-        } else {
-            iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
-        }
-
-        toast.innerHTML = `
-            <div class="toast-content">
-                ${iconSvg}
-                <div class="toast-text-wrap">
-                    <span class="toast-title">${title}</span>
-                    <span class="toast-message">${message}</span>
-                </div>
-            </div>
-            <div class="toast-progress-bar">
-                <div class="toast-progress-fill" style="transition-duration: ${duration}ms;"></div>
-            </div>
-        `;
-
-        container.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('show');
-            const fill = toast.querySelector('.toast-progress-fill');
-            if (fill) fill.style.transform = 'scaleX(0)';
-        }, 20);
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, duration);
-    }
-
-    const usernameInput = document.getElementById('username-input');
-    const userIdInput = document.getElementById('user-id-input');
-    const emailInput = document.getElementById('email-input');
-    const displayUsername = document.getElementById('display-username');
-    const displayRole = document.getElementById('display-role');
-    const avatarInitial = document.getElementById('avatar-initial');
-    const adminTabBtn = document.getElementById('admin-db-tab');
-    const adminUsersList = document.getElementById('admin-users-list');
-    const logoutBtn = document.getElementById('logout-btn');
-    
-    const openChangeEmailBtn = document.getElementById('open-change-email-btn');
-    const openChangePasswordBtn = document.getElementById('open-change-password-btn');
-    const toggle2faBtn = document.getElementById('toggle-2fa-btn');
-    const faStatusDesc = document.getElementById('fa-status-desc');
-
-    const customDialogOverlay = document.getElementById('custom-dialog-overlay');
-    const customDialogBox = document.getElementById('custom-dialog-box');
-
-    const notificationsBtn = document.getElementById('notifications-btn');
-    const notificationsDropdown = document.getElementById('notifications-dropdown');
-
-    if (notificationsBtn && notificationsDropdown) {
-        notificationsBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            notificationsDropdown.classList.toggle('active');
-        });
-        document.addEventListener('click', (e) => {
-            if (!notificationsDropdown.contains(e.target) && !notificationsBtn.contains(e.target)) {
-                notificationsDropdown.classList.remove('active');
+    <script>
+        // Live clock ticker
+        function updateClock() {
+            const clockElement = document.getElementById('clock-time');
+            if (clockElement) {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                clockElement.textContent = `${hours}:${minutes}:${seconds}`;
             }
-        });
-    }
-
-    function cleanId(id) {
-        return String(id || '').replace(/^#/, '').trim();
-    }
-
-    function getUsersDB() {
-        const users = localStorage.getItem('flowstudy_users');
-        if (!users) {
-            const initialDefault = [
-                { id: 'knqw', username: 'admin', email: 'admin@mail.com', is2fa: false },
-                { id: '1', username: 'User', email: '', is2fa: false }
-            ];
-            localStorage.setItem('flowstudy_users', JSON.stringify(initialDefault));
-            return initialDefault;
         }
-        return JSON.parse(users);
-    }
+        setInterval(updateClock, 1000);
+        updateClock();
 
-    function saveUsersDB(users) {
-        localStorage.setItem('flowstudy_users', JSON.stringify(users));
-    }
+        function showToast(title, message, type = 'success', duration = 4000) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
 
-    function applyUserData(name, id, email, is2fa) {
-        const cleanName = name ? name.trim() : 'User';
-        const rawId = cleanId(id) || 'knqw';
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
 
-        if (displayUsername) displayUsername.textContent = cleanName;
-        if (avatarInitial) avatarInitial.textContent = cleanName.charAt(0).toUpperCase();
-        if (usernameInput) usernameInput.value = cleanName;
-        if (userIdInput) userIdInput.value = rawId;
-        if (emailInput) emailInput.value = email || '';
-
-        if (toggle2faBtn && faStatusDesc) {
-            if (is2fa) {
-                toggle2faBtn.textContent = 'Disable 2FA';
-                faStatusDesc.textContent = '2FA is currently enabled';
+            let iconSvg = '';
+            if (type === 'success') {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+            } else if (type === 'error') {
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
             } else {
-                toggle2faBtn.textContent = 'Enable 2FA';
-                faStatusDesc.textContent = 'Protect your account with extra security';
+                iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
             }
-        }
 
-        const isAdmin = rawId.toLowerCase() === 'knqw';
-        if (displayRole) displayRole.textContent = isAdmin ? 'Admin' : 'Student';
-        if (adminTabBtn) adminTabBtn.style.display = isAdmin ? 'flex' : 'none';
-    }
-
-    const sessionRaw = localStorage.getItem('flowstudy_session');
-    let session = sessionRaw ? JSON.parse(sessionRaw) : null;
-
-    if (session && session.username) {
-        applyUserData(session.username, session.id, session.email, session.is2fa);
-    } else {
-        const users = getUsersDB();
-        const defaultUser = users.find(u => cleanId(u.id).toLowerCase() === 'knqw') || users[0];
-        session = defaultUser;
-        localStorage.setItem('flowstudy_session', JSON.stringify(session));
-        applyUserData(session.username, session.id, session.email, session.is2fa);
-    }
-
-    if (usernameInput) {
-        usernameInput.addEventListener('input', (e) => {
-            const newName = e.target.value.trim() || 'User';
-            if (displayUsername) displayUsername.textContent = newName;
-            if (avatarInitial) avatarInitial.textContent = newName.charAt(0).toUpperCase();
-
-            if (session) {
-                const users = getUsersDB();
-                const oldId = cleanId(session.id);
-                const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === oldId.toLowerCase());
-                session.username = newName;
-                if (userIdx !== -1) users[userIdx].username = newName;
-                
-                localStorage.setItem('flowstudy_session', JSON.stringify(session));
-                saveUsersDB(users);
-            }
-        });
-    }
-
-    function showCustomDialog(htmlContent, onSubmit) {
-        customDialogBox.innerHTML = htmlContent;
-        customDialogOverlay.classList.add('active');
-
-        const cancelBtn = customDialogBox.querySelector('.dialog-cancel');
-        const submitBtn = customDialogBox.querySelector('.dialog-submit');
-
-        const close = () => {
-            customDialogOverlay.classList.remove('active');
-            customDialogBox.innerHTML = '';
-        };
-
-        if (cancelBtn) cancelBtn.onclick = close;
-        if (submitBtn) submitBtn.onclick = () => {
-            if (onSubmit() !== false) {
-                close();
-            }
-        };
-    }
-
-    if (openChangeEmailBtn) {
-        openChangeEmailBtn.addEventListener('click', () => {
-            showCustomDialog(`
-                <h3>Change Email Address</h3>
-                <p>Enter your new email address. A confirmation code will be required.</p>
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-                    <input type="email" class="setting-input" id="dialog-new-email" placeholder="New email address">
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" class="setting-input" id="dialog-code" placeholder="Confirmation code (use 1234)" style="flex: 1;">
-                        <button class="btn-secondary" id="send-code-btn" style="white-space: nowrap;">Send Code</button>
+            toast.innerHTML = `
+                <div class="toast-content">
+                    ${iconSvg}
+                    <div class="toast-text-wrap">
+                        <span class="toast-title">${title}</span>
+                        <span class="toast-message">${message}</span>
                     </div>
                 </div>
-                <div class="custom-dialog-actions">
-                    <button class="btn-secondary dialog-cancel">Cancel</button>
-                    <button class="btn-primary dialog-submit">Verify & Update</button>
+                <div class="toast-progress-bar">
+                    <div class="toast-progress-fill" style="transition-duration: ${duration}ms;"></div>
                 </div>
-            `, () => {
-                const newEmail = document.getElementById('dialog-new-email').value.trim();
-                const code = document.getElementById('dialog-code').value.trim();
-                if (!newEmail) {
-                    showToast('Error', 'Please enter a new email address.', 'error');
-                    return false;
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+                const fill = toast.querySelector('.toast-progress-fill');
+                if (fill) fill.style.transform = 'scaleX(0)';
+            }, 20);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        const usernameInput = document.getElementById('username-input');
+        const userIdInput = document.getElementById('user-id-input');
+        const emailInput = document.getElementById('email-input');
+        const displayUsername = document.getElementById('display-username');
+        const displayRole = document.getElementById('display-role');
+        const avatarInitial = document.getElementById('avatar-initial');
+        const adminTabBtn = document.getElementById('admin-db-tab');
+        const adminUsersList = document.getElementById('admin-users-list');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        const openChangeEmailBtn = document.getElementById('open-change-email-btn');
+        const openChangePasswordBtn = document.getElementById('open-change-password-btn');
+        const toggle2faBtn = document.getElementById('toggle-2fa-btn');
+        const faStatusDesc = document.getElementById('fa-status-desc');
+
+        const customDialogOverlay = document.getElementById('custom-dialog-overlay');
+        const customDialogBox = document.getElementById('custom-dialog-box');
+
+        const notificationsBtn = document.getElementById('notifications-btn');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+
+        if (notificationsBtn && notificationsDropdown) {
+            notificationsBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notificationsDropdown.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (!notificationsDropdown.contains(e.target) && !notificationsBtn.contains(e.target)) {
+                    notificationsDropdown.classList.remove('active');
                 }
-                if (code !== '1234') {
-                    showToast('Error', 'Invalid confirmation code. (Use 1234 for demo)', 'error');
-                    return false;
+            });
+        }
+
+        function cleanId(id) {
+            return String(id || '').replace(/^#/, '').trim();
+        }
+
+        function getUsersDB() {
+            const users = localStorage.getItem('flowstudy_users');
+            if (!users) {
+                const initialDefault = [
+                    { id: 'knqw', username: 'admin', email: 'admin@mail.com', is2fa: false },
+                    { id: '1', username: 'User', email: '', is2fa: false }
+                ];
+                localStorage.setItem('flowstudy_users', JSON.stringify(initialDefault));
+                return initialDefault;
+            }
+            return JSON.parse(users);
+        }
+
+        function saveUsersDB(users) {
+            localStorage.setItem('flowstudy_users', JSON.stringify(users));
+        }
+
+        function applyUserData(name, id, email, is2fa) {
+            const cleanName = name ? name.trim() : 'User';
+            const rawId = cleanId(id) || 'knqw';
+
+            if (displayUsername) displayUsername.textContent = cleanName;
+            if (avatarInitial) avatarInitial.textContent = cleanName.charAt(0).toUpperCase();
+            if (usernameInput) usernameInput.value = cleanName;
+            if (userIdInput) userIdInput.value = rawId;
+            if (emailInput) emailInput.value = email || '';
+
+            if (toggle2faBtn && faStatusDesc) {
+                if (is2fa) {
+                    toggle2faBtn.textContent = 'Disable 2FA';
+                    faStatusDesc.textContent = '2FA is currently enabled';
+                } else {
+                    toggle2faBtn.textContent = 'Enable 2FA';
+                    faStatusDesc.textContent = 'Protect your account with extra security';
                 }
-                
+            }
+
+            const isAdmin = rawId.toLowerCase() === 'knqw';
+            if (displayRole) displayRole.textContent = isAdmin ? 'Admin' : 'Student';
+            if (adminTabBtn) adminTabBtn.style.display = isAdmin ? 'flex' : 'none';
+        }
+
+        const sessionRaw = localStorage.getItem('flowstudy_session');
+        let session = sessionRaw ? JSON.parse(sessionRaw) : null;
+
+        if (session && session.username) {
+            applyUserData(session.username, session.id, session.email, session.is2fa);
+        } else {
+            const users = getUsersDB();
+            const defaultUser = users.find(u => cleanId(u.id).toLowerCase() === 'knqw') || users[0];
+            session = defaultUser;
+            localStorage.setItem('flowstudy_session', JSON.stringify(session));
+            applyUserData(session.username, session.id, session.email, session.is2fa);
+        }
+
+        if (usernameInput) {
+            usernameInput.addEventListener('input', (e) => {
+                const newName = e.target.value.trim() || 'User';
+                if (displayUsername) displayUsername.textContent = newName;
+                if (avatarInitial) avatarInitial.textContent = newName.charAt(0).toUpperCase();
+
                 if (session) {
-                    session.email = newEmail;
                     const users = getUsersDB();
-                    const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
-                    if (userIdx !== -1) users[userIdx].email = newEmail;
+                    const oldId = cleanId(session.id);
+                    const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === oldId.toLowerCase());
+                    session.username = newName;
+                    if (userIdx !== -1) users[userIdx].username = newName;
                     
                     localStorage.setItem('flowstudy_session', JSON.stringify(session));
                     saveUsersDB(users);
-                    applyUserData(session.username, session.id, session.email, session.is2fa);
-                    showToast('Success', 'Email successfully updated!', 'success');
                 }
             });
-
-            setTimeout(() => {
-                const sendCodeBtn = document.getElementById('send-code-btn');
-                if (sendCodeBtn) {
-                    sendCodeBtn.onclick = () => {
-                        showToast('Info', 'Confirmation code sent! (Demo code: 1234)', 'info');
-                    };
-                }
-            }, 50);
-        });
-    }
-
-    if (openChangePasswordBtn) {
-        openChangePasswordBtn.addEventListener('click', () => {
-            showCustomDialog(`
-                <h3>Change Password</h3>
-                <p>Provide your old password and a secure new one.</p>
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
-                    <input type="password" class="setting-input" id="dialog-old-pass" placeholder="Current password">
-                    <input type="password" class="setting-input" id="dialog-new-pass" placeholder="New password (min 4 chars)">
-                </div>
-                <div class="custom-dialog-actions">
-                    <button class="btn-secondary dialog-cancel">Cancel</button>
-                    <button class="btn-primary dialog-submit">Update Password</button>
-                </div>
-            `, () => {
-                const oldP = document.getElementById('dialog-old-pass').value;
-                const newP = document.getElementById('dialog-new-pass').value;
-                if (!oldP || !newP) {
-                    showToast('Error', 'Please fill in all fields.', 'error');
-                    return false;
-                }
-                if (newP.length < 4) {
-                    showToast('Error', 'Password must be at least 4 characters long.', 'error');
-                    return false;
-                }
-                showToast('Success', 'Password successfully updated!', 'success');
-            });
-        });
-    }
-
-    if (toggle2faBtn) {
-        toggle2faBtn.addEventListener('click', () => {
-            const isCurrentlyEnabled = session && session.is2fa;
-
-            if (isCurrentlyEnabled) {
-                showCustomDialog(`
-                    <h3>Disable 2FA</h3>
-                    <p>Enter your password to disable Two-Factor Authentication.</p>
-                    <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
-                    <div class="custom-dialog-actions">
-                        <button class="btn-secondary dialog-cancel">Cancel</button>
-                        <button class="btn-primary dialog-submit">Disable</button>
-                    </div>
-                `, () => {
-                    const pass = document.getElementById('dialog-2fa-pass').value;
-                    if (!pass) {
-                        showToast('Error', 'Password is required.', 'error');
-                        return false;
-                    }
-                    updateSession2FA(false);
-                });
-            } else {
-                showCustomDialog(`
-                    <h3>Enable 2FA</h3>
-                    <p>Confirm your password to enable Two-Factor Authentication.</p>
-                    <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
-                    <div class="custom-dialog-actions">
-                        <button class="btn-secondary dialog-cancel">Cancel</button>
-                        <button class="btn-primary dialog-submit">Enable</button>
-                    </div>
-                `, () => {
-                    const pass = document.getElementById('dialog-2fa-pass').value;
-                    if (!pass) {
-                        showToast('Error', 'Password is required.', 'error');
-                        return false;
-                    }
-                    updateSession2FA(true);
-                });
-            }
-        });
-    }
-
-    function updateSession2FA(status) {
-        if (session) {
-            session.is2fa = status;
-            const users = getUsersDB();
-            const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
-            if (userIdx !== -1) users[userIdx].is2fa = status;
-
-            localStorage.setItem('flowstudy_session', JSON.stringify(session));
-            saveUsersDB(users);
-            applyUserData(session.username, session.id, session.email, session.is2fa);
-            showToast('2FA Status', status ? 'Two-Factor Authentication successfully enabled!' : 'Two-Factor Authentication disabled.', status ? 'success' : 'info');
-        }
-    }
-
-    function renderAdminUsersList() {
-        if (!adminUsersList) return;
-        const users = getUsersDB();
-        adminUsersList.innerHTML = '';
-
-        if (users.length === 0) {
-            adminUsersList.innerHTML = '<div style="color: #888; font-size: 14px;">No users found</div>';
-            return;
         }
 
-        users.forEach(u => {
-            const userCleanId = cleanId(u.id);
-            const isProtectedAdmin = userCleanId.toLowerCase() === 'knqw';
-            const row = document.createElement('div');
-            row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 14px;';
-            
-            row.innerHTML = `
-                <div>
-                    <strong style="color: #0f172a;">${u.username}</strong> 
-                    <span style="color: #64748b; font-size: 12px;">(#${userCleanId})</span>
-                    <div style="color: #64748b; font-size: 11px;">${u.email ? u.email : 'No email'}</div>
-                </div>
-                ${isProtectedAdmin 
-                    ? '<span style="color: #94a3b8; font-size: 12px; font-weight: 500;">Protected</span>' 
-                    : `<button class="delete-user-btn" data-id="${userCleanId}" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Delete</button>`
+        function showCustomDialog(htmlContent, onSubmit) {
+            customDialogBox.innerHTML = htmlContent;
+            customDialogOverlay.classList.add('active');
+
+            const cancelBtn = customDialogBox.querySelector('.dialog-cancel');
+            const submitBtn = customDialogBox.querySelector('.dialog-submit');
+
+            const close = () => {
+                customDialogOverlay.classList.remove('active');
+                customDialogBox.innerHTML = '';
+            };
+
+            if (cancelBtn) cancelBtn.onclick = close;
+            if (submitBtn) submitBtn.onclick = () => {
+                if (onSubmit() !== false) {
+                    close();
                 }
-            `;
+            };
+        }
 
-            adminUsersList.appendChild(row);
-        });
+        if (openChangeEmailBtn) {
+            openChangeEmailBtn.addEventListener('click', () => {
+                showCustomDialog(`
+                    <h3>Change Email Address</h3>
+                    <p>Enter your new email address. A confirmation code will be required.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                        <input type="email" class="setting-input" id="dialog-new-email" placeholder="New email address">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" class="setting-input" id="dialog-code" placeholder="Confirmation code (use 1234)" style="flex: 1;">
+                            <button class="btn-secondary" id="send-code-btn" style="white-space: nowrap;">Send Code</button>
+                        </div>
+                    </div>
+                    <div class="custom-dialog-actions">
+                        <button class="btn-secondary dialog-cancel">Cancel</button>
+                        <button class="btn-primary dialog-submit">Verify & Update</button>
+                    </div>
+                `, () => {
+                    const newEmail = document.getElementById('dialog-new-email').value.trim();
+                    const code = document.getElementById('dialog-code').value.trim();
+                    if (!newEmail) {
+                        showToast('Error', 'Please enter a new email address.', 'error');
+                        return false;
+                    }
+                    if (code !== '1234') {
+                        showToast('Error', 'Invalid confirmation code. (Use 1234 for demo)', 'error');
+                        return false;
+                    }
+                    
+                    if (session) {
+                        session.email = newEmail;
+                        const users = getUsersDB();
+                        const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
+                        if (userIdx !== -1) users[userIdx].email = newEmail;
+                        
+                        localStorage.setItem('flowstudy_session', JSON.stringify(session));
+                        saveUsersDB(users);
+                        applyUserData(session.username, session.id, session.email, session.is2fa);
+                        showToast('Success', 'Email successfully updated!', 'success');
+                    }
+                });
 
-        adminUsersList.querySelectorAll('.delete-user-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idToDelete = cleanId(e.target.getAttribute('data-id'));
-                let usersBefore = getUsersDB();
-                let updatedUsers = usersBefore.filter(u => cleanId(u.id).toLowerCase() !== idToDelete.toLowerCase());
-                saveUsersDB(updatedUsers);
-                renderAdminUsersList();
-                showToast('User Deleted', `User #${idToDelete} was removed.`, 'info');
+                setTimeout(() => {
+                    const sendCodeBtn = document.getElementById('send-code-btn');
+                    if (sendCodeBtn) {
+                        sendCodeBtn.onclick = () => {
+                            showToast('Info', 'Confirmation code sent! (Demo code: 1234)', 'info');
+                        };
+                    }
+                }, 50);
             });
-        });
-    }
+        }
 
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            showCustomDialog(`
-                <h3>Log Out</h3>
-                <p>Are you sure you want to end your session?</p>
-                <div class="custom-dialog-actions">
-                    <button class="btn-secondary dialog-cancel">Cancel</button>
-                    <button class="btn-primary dialog-submit" style="background: #ef4444;">Log Out</button>
-                </div>
-            `, () => {
-                localStorage.removeItem('flowstudy_session');
-                window.location.reload();
+        if (openChangePasswordBtn) {
+            openChangePasswordBtn.addEventListener('click', () => {
+                showCustomDialog(`
+                    <h3>Change Password</h3>
+                    <p>Provide your old password and a secure new one.</p>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 5px;">
+                        <input type="password" class="setting-input" id="dialog-old-pass" placeholder="Current password">
+                        <input type="password" class="setting-input" id="dialog-new-pass" placeholder="New password (min 4 chars)">
+                    </div>
+                    <div class="custom-dialog-actions">
+                        <button class="btn-secondary dialog-cancel">Cancel</button>
+                        <button class="btn-primary dialog-submit">Update Password</button>
+                    </div>
+                `, () => {
+                    const oldP = document.getElementById('dialog-old-pass').value;
+                    const newP = document.getElementById('dialog-new-pass').value;
+                    if (!oldP || !newP) {
+                        showToast('Error', 'Please fill in all fields.', 'error');
+                        return false;
+                    }
+                    if (newP.length < 4) {
+                        showToast('Error', 'Password must be at least 4 characters long.', 'error');
+                        return false;
+                    }
+                    showToast('Success', 'Password successfully updated!', 'success');
+                });
             });
-        });
-    }
+        }
 
-    const sidebar = document.getElementById('sidebar');
-    const toggleBtn = document.getElementById('toggle-btn');
-    const toggleIcon = document.getElementById('toggle-icon');
+        if (toggle2faBtn) {
+            toggle2faBtn.addEventListener('click', () => {
+                const isCurrentlyEnabled = session && session.is2fa;
 
-    if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-            if (toggleIcon) {
-                toggleIcon.innerHTML = sidebar.classList.contains('collapsed') 
-                    ? '<polyline points="9 18 15 12 9 6"></polyline>' 
-                    : '<polyline points="15 18 9 12 15 6"></polyline>';
-            }
-        });
-    }
-
-    const navItems = document.querySelectorAll('.nav-list .nav-item');
-    const viewSections = document.querySelectorAll('.view-section');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            navItems.forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-
-            const view = item.getAttribute('data-view');
-            viewSections.forEach(section => {
-                section.classList.remove('active');
-            });
-
-            const targetSection = document.getElementById(`view-${view}`);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-        });
-    });
-
-    const modalOverlay = document.getElementById('settings-modal-overlay');
-    const openSettingsBtn = document.getElementById('open-settings-btn');
-    const profileSettingsBtn = document.getElementById('profile-settings-btn');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-
-    function openModal() { if (modalOverlay) modalOverlay.classList.add('active'); }
-    function closeModal() { if (modalOverlay) modalOverlay.classList.remove('active'); }
-
-    if (openSettingsBtn) openSettingsBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
-    if (profileSettingsBtn) profileSettingsBtn.addEventListener('click', openModal);
-    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
-    }
-
-    const subscriptionsModalOverlay = document.getElementById('subscriptions-modal-overlay');
-    const openSubscriptionsBtn = document.getElementById('open-subscriptions-btn');
-
-    function openSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.add('active'); }
-    function closeSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.remove('active'); }
-
-    if (openSubscriptionsBtn) openSubscriptionsBtn.addEventListener('click', (e) => { e.preventDefault(); openSubsModal(); });
-    const closeSubsBtnEl = document.getElementById('close-subscriptions-btn');
-    if (closeSubsBtnEl) closeSubsBtnEl.addEventListener('click', closeSubsModal);
-
-    if (subscriptionsModalOverlay) {
-        subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
-    }
-
-    const billingToggleButtons = document.querySelectorAll('.billing-toggle .toggle-btn');
-    billingToggleButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            billingToggleButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            const period = button.getAttribute('data-period');
-            const amounts = document.querySelectorAll('.subs-grid .amount');
-            const periods = document.querySelectorAll('.subs-grid .period');
-
-            amounts.forEach(amount => {
-                if (period === 'yearly') {
-                    amount.textContent = amount.getAttribute('data-yearly');
+                if (isCurrentlyEnabled) {
+                    showCustomDialog(`
+                        <h3>Disable 2FA</h3>
+                        <p>Enter your password to disable Two-Factor Authentication.</p>
+                        <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
+                        <div class="custom-dialog-actions">
+                            <button class="btn-secondary dialog-cancel">Cancel</button>
+                            <button class="btn-primary dialog-submit">Disable</button>
+                        </div>
+                    `, () => {
+                        const pass = document.getElementById('dialog-2fa-pass').value;
+                        if (!pass) {
+                            showToast('Error', 'Password is required.', 'error');
+                            return false;
+                        }
+                        updateSession2FA(false);
+                    });
                 } else {
-                    amount.textContent = amount.getAttribute('data-monthly');
+                    showCustomDialog(`
+                        <h3>Enable 2FA</h3>
+                        <p>Confirm your password to enable Two-Factor Authentication.</p>
+                        <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
+                        <div class="custom-dialog-actions">
+                            <button class="btn-secondary dialog-cancel">Cancel</button>
+                            <button class="btn-primary dialog-submit">Enable</button>
+                        </div>
+                    `, () => {
+                        const pass = document.getElementById('dialog-2fa-pass').value;
+                        if (!pass) {
+                            showToast('Error', 'Password is required.', 'error');
+                            return false;
+                        }
+                        updateSession2FA(true);
+                    });
                 }
             });
+        }
 
-            periods.forEach(p => {
-                p.textContent = period === 'yearly' ? '/ yr' : '/ mo';
+        function updateSession2FA(status) {
+            if (session) {
+                session.is2fa = status;
+                const users = getUsersDB();
+                const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
+                if (userIdx !== -1) users[userIdx].is2fa = status;
+
+                localStorage.setItem('flowstudy_session', JSON.stringify(session));
+                saveUsersDB(users);
+                applyUserData(session.username, session.id, session.email, session.is2fa);
+                showToast('2FA Status', status ? 'Two-Factor Authentication successfully enabled!' : 'Two-Factor Authentication disabled.', status ? 'success' : 'info');
+            }
+        }
+
+        function renderAdminUsersList() {
+            if (!adminUsersList) return;
+            const users = getUsersDB();
+            adminUsersList.innerHTML = '';
+
+            if (users.length === 0) {
+                adminUsersList.innerHTML = '<div style="color: #888; font-size: 14px;">No users found</div>';
+                return;
+            }
+
+            users.forEach(u => {
+                const userCleanId = cleanId(u.id);
+                const isProtectedAdmin = userCleanId.toLowerCase() === 'knqw';
+                const row = document.createElement('div');
+                row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 14px;';
+                
+                row.innerHTML = `
+                    <div>
+                        <strong style="color: #0f172a;">${u.username}</strong> 
+                        <span style="color: #64748b; font-size: 12px;">(#${userCleanId})</span>
+                        <div style="color: #64748b; font-size: 11px;">${u.email ? u.email : 'No email'}</div>
+                    </div>
+                    ${isProtectedAdmin 
+                        ? '<span style="color: #94a3b8; font-size: 12px; font-weight: 500;">Protected</span>' 
+                        : `<button class="delete-user-btn" data-id="${userCleanId}" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Delete</button>`
+                    }
+                `;
+
+                adminUsersList.appendChild(row);
+            });
+
+            adminUsersList.querySelectorAll('.delete-user-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idToDelete = cleanId(e.target.getAttribute('data-id'));
+                    let usersBefore = getUsersDB();
+                    let updatedUsers = usersBefore.filter(u => cleanId(u.id).toLowerCase() !== idToDelete.toLowerCase());
+                    saveUsersDB(updatedUsers);
+                    renderAdminUsersList();
+                    showToast('User Deleted', `User #${idToDelete} was removed.`, 'info');
+                });
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                showCustomDialog(`
+                    <h3>Log Out</h3>
+                    <p>Are you sure you want to end your session?</p>
+                    <div class="custom-dialog-actions">
+                        <button class="btn-secondary dialog-cancel">Cancel</button>
+                        <button class="btn-primary dialog-submit" style="background: #ef4444;">Log Out</button>
+                    </div>
+                `, () => {
+                    localStorage.removeItem('flowstudy_session');
+                    window.location.reload();
+                });
+            });
+        }
+
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const toggleIcon = document.getElementById('toggle-icon');
+
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+                if (toggleIcon) {
+                    toggleIcon.innerHTML = sidebar.classList.contains('collapsed') 
+                        ? '<polyline points="9 18 15 12 9 6"></polyline>' 
+                        : '<polyline points="15 18 9 12 15 6"></polyline>';
+                }
+            });
+        }
+
+        const navItems = document.querySelectorAll('.nav-list .nav-item');
+        const viewSections = document.querySelectorAll('.view-section');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+
+                const view = item.getAttribute('data-view');
+                viewSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+
+                const targetSection = document.getElementById(`view-${view}`);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
             });
         });
-    });
 
-    document.addEventListener('keydown', (e) => { 
-        if (e.key === 'Escape') {
-            if (modalOverlay) modalOverlay.classList.remove('active');
-            if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.remove('active');
+        const modalOverlay = document.getElementById('settings-modal-overlay');
+        const openSettingsBtn = document.getElementById('open-settings-btn');
+        const profileSettingsBtn = document.getElementById('profile-settings-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        function openModal() { if (modalOverlay) modalOverlay.classList.add('active'); }
+        function closeModal() { if (modalOverlay) modalOverlay.classList.remove('active'); }
+
+        if (openSettingsBtn) openSettingsBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
+        if (profileSettingsBtn) profileSettingsBtn.addEventListener('click', openModal);
+        if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
         }
-    });
 
-    const tabBtns = document.querySelectorAll('.modal-sidebar .tab-btn');
-    const tabPanels = document.querySelectorAll('.tab-panel');
+        const subscriptionsModalOverlay = document.getElementById('subscriptions-modal-overlay');
+        const openSubscriptionsBtn = document.getElementById('open-subscriptions-btn');
 
-    tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (btn.id === 'logout-btn') return;
-            const targetTab = btn.getAttribute('data-tab');
+        function openSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.add('active'); }
+        function closeSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.remove('active'); }
 
-            tabBtns.forEach(b => {
-                b.classList.remove('active');
+        if (openSubscriptionsBtn) openSubscriptionsBtn.addEventListener('click', (e) => { e.preventDefault(); openSubsModal(); });
+        const closeSubsBtnEl = document.getElementById('close-subscriptions-btn');
+        if (closeSubsBtnEl) closeSubsBtnEl.addEventListener('click', closeSubsModal);
+
+        if (subscriptionsModalOverlay) {
+            subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
+        }
+
+        const billingToggleButtons = document.querySelectorAll('.billing-toggle .toggle-btn');
+        billingToggleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                billingToggleButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const period = button.getAttribute('data-period');
+                const amounts = document.querySelectorAll('.subs-grid .amount');
+                const periods = document.querySelectorAll('.subs-grid .period');
+
+                amounts.forEach(amount => {
+                    if (period === 'yearly') {
+                        amount.textContent = amount.getAttribute('data-yearly');
+                    } else {
+                        amount.textContent = amount.getAttribute('data-monthly');
+                    }
+                });
+
+                periods.forEach(p => {
+                    p.textContent = period === 'yearly' ? '/ yr' : '/ mo';
+                });
             });
-            tabPanels.forEach(p => p.classList.remove('active'));
+        });
 
-            btn.classList.add('active');
-            const panel = document.getElementById(targetTab);
-            if (panel) panel.classList.add('active');
-
-            if (targetTab === 'tab-admin') {
-                renderAdminUsersList();
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'Escape') {
+                if (modalOverlay) modalOverlay.classList.remove('active');
+                if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.remove('active');
             }
         });
-    });
-</script>
+
+        const tabBtns = document.querySelectorAll('.modal-sidebar .tab-btn');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (btn.id === 'logout-btn') return;
+                const targetTab = btn.getAttribute('data-tab');
+
+                tabBtns.forEach(b => {
+                    b.classList.remove('active');
+                });
+                tabPanels.forEach(p => p.classList.remove('active'));
+
+                btn.classList.add('active');
+                const panel = document.getElementById(targetTab);
+                if (panel) panel.classList.add('active');
+
+                if (targetTab === 'tab-admin') {
+                    renderAdminUsersList();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
