@@ -1204,7 +1204,6 @@
     <div class="toast-container" id="toast-container"></div>
 
 <script>
-    // ... (функция showToast остается без изменений) ...
     function showToast(title, message, type = 'success', duration = 4000) {
         const container = document.getElementById('toast-container');
         if (!container) return;
@@ -1274,10 +1273,8 @@
                     </button>
                 </div>
             `;
-            // Перепривязываем кнопку открытия модального окна, так как HTML перерендерился
             document.getElementById('open-add-class-btn').addEventListener('click', openAddClassModal);
         } else {
-            // Если что-то подключено, показываем фейковые синхронизированные классы
             let classesHtml = '';
             if (integrations.googleClassroom) {
                 classesHtml += `
@@ -1321,7 +1318,6 @@
         }
     }
 
-    // Инициализация кнопок в модалке интеграций в соответствии с сохраненным статусом
     function updateIntegrationModalUI() {
         const integrations = getIntegrations();
         
@@ -1360,7 +1356,6 @@
         }
     }
 
-    // Обработка кликов по кнопкам Connect внутри модалки
     const connectButtons = document.querySelectorAll('.integration-connect-btn');
     connectButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1380,7 +1375,6 @@
         });
     });
 
-    // Обычная логика аккаунта, темы и модалок
     const usernameInput = document.getElementById('username-input');
     const userIdInput = document.getElementById('user-id-input');
     const emailInput = document.getElementById('email-input');
@@ -1738,11 +1732,12 @@
             tabPanels.forEach(p => p.classList.remove('active'));
             btn.classList.add('active');
             const panel = document.getElementById(targetTab);
-            if (panel) panel.classList.0 ? panel.classList.add('active') : panel.classList.add('active');
+            if (panel) panel.classList.add('active');
             if (targetTab === 'tab-admin') renderAdminUsersList();
         });
     });
 
-
     renderDashboardClasses();
 </script>
+</body>
+</html>
