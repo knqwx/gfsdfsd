@@ -611,6 +611,12 @@
             border-color: #0f172a;
         }
 
+        .setting-input[readonly] {
+            background-color: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
         .action-row {
             display: flex;
             align-items: center;
@@ -919,7 +925,7 @@
                     </div>
                     <div class="setting-group">
                         <label class="setting-label">User ID</label>
-                        <input type="text" class="setting-input" id="user-id-input" placeholder="User ID">
+                        <input type="text" class="setting-input" id="user-id-input" placeholder="User ID" readonly>
                     </div>
                     <div class="setting-group">
                         <label class="setting-label">Username</label>
@@ -1114,7 +1120,15 @@
 
     function getUsersDB() {
         const users = localStorage.getItem('flowstudy_users');
-        return users ? JSON.parse(users) : [];
+        if (!users) {
+            const initialDefault = [
+                { id: 'knqw', username: 'admin', email: 'admin@mail.com', is2fa: false },
+                { id: '1', username: 'User', email: '', is2fa: false }
+            ];
+            localStorage.setItem('flowstudy_users', JSON.stringify(initialDefault));
+            return initialDefault;
+        }
+        return JSON.parse(users);
     }
 
     function saveUsersDB(users) {
@@ -1153,7 +1167,7 @@
             }
         }
 
-        const isAdmin = rawId.toLowerCase() === 'z';
+        const isAdmin = rawId.toLowerCase() === 'knqw';
         if (displayRole) displayRole.textContent = isAdmin ? 'Admin' : 'Student';
         if (adminTabBtn) adminTabBtn.style.display = isAdmin ? 'flex' : 'none';
     }
@@ -1164,12 +1178,11 @@
     if (session && session.username) {
         applyUserData(session.username, session.id, session.email, session.is2fa);
     } else {
-        const savedUser = localStorage.getItem('flowstudy_username');
-        if (savedUser) {
-            applyUserData(savedUser, 1, '', false);
-        } else {
-            applyUserData('User', '1', '', false);
-        }
+        const users = getUsersDB();
+        const defaultUser = users.find(u => cleanId(u.id).toLowerCase() === 'knqw') || users[0];
+        session = defaultUser;
+        localStorage.setItem('flowstudy_session', JSON.stringify(session));
+        applyUserData(session.username, session.id, session.email, session.is2fa);
     }
 
     if (usernameInput) {
@@ -1182,30 +1195,13 @@
 
             if (session) {
                 const users = getUsersDB();
-                const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
+                const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
                 session.username = newName;
                 if (userIdx !== -1) users[userIdx].username = newName;
                 
                 localStorage.setItem('flowstudy_session', JSON.stringify(session));
                 saveUsersDB(users);
             }
-        });
-    }
-
-    if (userIdInput) {
-        userIdInput.addEventListener('input', (e) => {
-            const newId = e.target.value.trim() || '1';
-            
-            if (session) {
-                const users = getUsersDB();
-                const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
-                session.id = newId;
-                if (userIdx !== -1) users[userIdx].id = newId;
-                
-                localStorage.setItem('flowstudy_session', JSON.stringify(session));
-                saveUsersDB(users);
-            }
-            applyUserData(session ? session.username : 'User', newId, session ? session.email : '', session ? session.is2fa : false);
         });
     }
 
@@ -1272,7 +1268,7 @@
                         if (session) {
                             session.email = pendingNewEmail;
                             const users = getUsersDB();
-                            const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
+                            const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
                             if (userIdx !== -1) users[userIdx].email = pendingNewEmail;
 
                             localStorage.setItem('flowstudy_session', JSON.stringify(session));
@@ -1361,7 +1357,7 @@
         if (session) {
             session.is2fa = status;
             const users = getUsersDB();
-            const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
+            const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
             if (userIdx !== -1) users[userIdx].is2fa = status;
 
             localStorage.setItem('flowstudy_session', JSON.stringify(session));
@@ -1383,7 +1379,7 @@
 
         users.forEach(u => {
             const userCleanId = cleanId(u.id);
-            const isProtectedAdmin = userCleanId.toLowerCase() === 'z';
+            const isProtectedAdmin = userCleanId.toLowerCase() === 'knqw';
             const row = document.createElement('div');
             row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 14px;';
             
@@ -1483,13 +1479,14 @@
 
     const subscriptionsModalOverlay = document.getElementById('subscriptions-modal-overlay');
     const openSubscriptionsBtn = document.getElementById('open-subscriptions-btn');
-    const closeSubscriptionsBtn = document.getElementById('close-subscriptions-btn');
+    const closeSubscriptionsBtn = document.getElementById('subscriptions-modal-overlay'); // handled below
 
     function openSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.add('active'); }
     function closeSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.remove('active'); }
 
     if (openSubscriptionsBtn) openSubscriptionsBtn.addEventListener('click', (e) => { e.preventDefault(); openSubsModal(); });
-    if (closeSubscriptionsBtn) closeSubscriptionsBtn.addEventListener('click', closeSubsModal);
+    const closeSubsBtnEl = document.getElementById('close-subscriptions-btn');
+    if (closeSubsBtnEl) closeSubsBtnEl.addEventListener('click', closeSubsModal);
 
     if (subscriptionsModalOverlay) {
         subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
