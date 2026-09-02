@@ -1204,22 +1204,16 @@
     <div class="toast-container" id="toast-container"></div>
 
 <script>
+    // ... (функция showToast остается без изменений) ...
     function showToast(title, message, type = 'success', duration = 4000) {
         const container = document.getElementById('toast-container');
         if (!container) return;
-
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
-
-        let iconSvg = '';
-        if (type === 'success') {
-            iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
-        } else if (type === 'error') {
-            iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
-        } else {
-            iconSvg = '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
-        }
-
+        let iconSvg = type === 'success' 
+            ? '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+            : '<svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+        
         toast.innerHTML = `
             <div class="toast-content">
                 ${iconSvg}
@@ -1232,21 +1226,161 @@
                 <div class="toast-progress-fill" style="transition-duration: ${duration}ms;"></div>
             </div>
         `;
-
         container.appendChild(toast);
-
         setTimeout(() => {
             toast.classList.add('show');
             const fill = toast.querySelector('.toast-progress-fill');
             if (fill) fill.style.transform = 'scaleX(0)';
         }, 20);
-
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, duration);
     }
 
+    // Состояние интеграций в localStorage
+    function getIntegrations() {
+        const data = localStorage.getItem('flowstudy_integrations');
+        return data ? JSON.parse(data) : { googleClassroom: false, human: false };
+    }
+
+    function saveIntegrations(integrations) {
+        localStorage.setItem('flowstudy_integrations', JSON.stringify(integrations));
+        renderDashboardClasses();
+    }
+
+    // Отрисовка дашборда (пусто или список классов)
+    function renderDashboardClasses() {
+        const integrations = getIntegrations();
+        const dashboardView = document.getElementById('view-dashboard');
+        if (!dashboardView) return;
+
+        const isConnectedAny = integrations.googleClassroom || integrations.human;
+
+        if (!isConnectedAny) {
+            dashboardView.innerHTML = `
+                <div>
+                    <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">Dashboard</h1>
+                    <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.2rem;">Welcome back to your study space.</p>
+                </div>
+                <div class="classes-empty-container">
+                    <svg class="classes-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                    </svg>
+                    <span class="classes-empty-text">You don't have any classes at the moment</span>
+                    <button class="btn-add-class" id="open-add-class-btn">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add a class
+                    </button>
+                </div>
+            `;
+            // Перепривязываем кнопку открытия модального окна, так как HTML перерендерился
+            document.getElementById('open-add-class-btn').addEventListener('click', openAddClassModal);
+        } else {
+            // Если что-то подключено, показываем фейковые синхронизированные классы
+            let classesHtml = '';
+            if (integrations.googleClassroom) {
+                classesHtml += `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span style="font-size: 0.75rem; font-weight: 600; color: #16a34a; background: #dcfce7; padding: 2px 8px; border-radius: 4px;">Google Classroom</span>
+                            <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a; margin-top: 4px;">Advanced Mathematics & Algorithms</h3>
+                            <p style="font-size: 0.8rem; color: #64748b;">Synced successfully • Next assignment due tomorrow</p>
+                        </div>
+                        <button class="btn-secondary" onclick="showToast('Info', 'Opening class workspace...', 'info')">Open</button>
+                    </div>`;
+            }
+            if (integrations.human) {
+                classesHtml += `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span style="font-size: 0.75rem; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 4px;">Human Profile</span>
+                            <h3 style="font-size: 1rem; font-weight: 600; color: #0f172a; margin-top: 4px;">Human Learning Group A</h3>
+                            <p style="font-size: 0.8rem; color: #64748b;">Synced successfully • 3 active chats</p>
+                        </div>
+                        <button class="btn-secondary" onclick="showToast('Info', 'Opening Human group...', 'info')">Open</button>
+                    </div>`;
+            }
+
+            dashboardView.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1 style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">Dashboard</h1>
+                        <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.2rem;">Here are your connected classes and spaces.</p>
+                    </div>
+                    <button class="btn-add-class" id="open-add-class-btn">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Manage / Add
+                    </button>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 0.5rem;">
+                    ${classesHtml}
+                </div>
+            `;
+            document.getElementById('open-add-class-btn').addEventListener('click', openAddClassModal);
+        }
+    }
+
+    // Инициализация кнопок в модалке интеграций в соответствии с сохраненным статусом
+    function updateIntegrationModalUI() {
+        const integrations = getIntegrations();
+        
+        const gcBtn = document.getElementById('connect-gc-btn');
+        if (gcBtn) {
+            if (integrations.googleClassroom) {
+                gcBtn.classList.add('connected');
+                gcBtn.textContent = 'Connected';
+                gcBtn.style.backgroundColor = '#dcfce7';
+                gcBtn.style.color = '#15803d';
+                gcBtn.style.borderColor = '#bbf7d0';
+            } else {
+                gcBtn.classList.remove('connected');
+                gcBtn.textContent = 'Connect';
+                gcBtn.style.backgroundColor = '#f1f5f9';
+                gcBtn.style.color = '#0f172a';
+                gcBtn.style.borderColor = '#cbd5e1';
+            }
+        }
+
+        const humanBtn = document.getElementById('connect-human-btn');
+        if (humanBtn) {
+            if (integrations.human) {
+                humanBtn.classList.add('connected');
+                humanBtn.textContent = 'Connected';
+                humanBtn.style.backgroundColor = '#dcfce7';
+                humanBtn.style.color = '#15803d';
+                humanBtn.style.borderColor = '#bbf7d0';
+            } else {
+                humanBtn.classList.remove('connected');
+                humanBtn.textContent = 'Connect';
+                humanBtn.style.backgroundColor = '#f1f5f9';
+                humanBtn.style.color = '#0f172a';
+                humanBtn.style.borderColor = '#cbd5e1';
+            }
+        }
+    }
+
+    // Обработка кликов по кнопкам Connect внутри модалки
+    const connectButtons = document.querySelectorAll('.integration-connect-btn');
+    connectButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const service = btn.getAttribute('data-service');
+            const integrations = getIntegrations();
+
+            if (service === 'Google Classroom') {
+                integrations.googleClassroom = !integrations.googleClassroom;
+                saveIntegrations(integrations);
+                showToast(integrations.googleClassroom ? 'Success' : 'Info', integrations.googleClassroom ? 'Connected to Google Classroom!' : 'Disconnected from Google Classroom.', integrations.googleClassroom ? 'success' : 'info');
+            } else if (service === 'Human') {
+                integrations.human = !integrations.human;
+                saveIntegrations(integrations);
+                showToast(integrations.human ? 'Success' : 'Info', integrations.human ? 'Connected to Human!' : 'Disconnected from Human.', integrations.human ? 'success' : 'info');
+            }
+            updateIntegrationModalUI();
+        });
+    });
+
+    // Обычная логика аккаунта, темы и модалок
     const usernameInput = document.getElementById('username-input');
     const userIdInput = document.getElementById('user-id-input');
     const emailInput = document.getElementById('email-input');
@@ -1280,9 +1414,7 @@
         });
     }
 
-    function cleanId(id) {
-        return String(id || '').replace(/^#/, '').trim();
-    }
+    function cleanId(id) { return String(id || '').replace(/^#/, '').trim(); }
 
     function getUsersDB() {
         const users = localStorage.getItem('flowstudy_users');
@@ -1297,9 +1429,7 @@
         return JSON.parse(users);
     }
 
-    function saveUsersDB(users) {
-        localStorage.setItem('flowstudy_users', JSON.stringify(users));
-    }
+    function saveUsersDB(users) { localStorage.setItem('flowstudy_users', JSON.stringify(users)); }
 
     function applyUserData(name, id, email, is2fa) {
         const cleanName = name ? name.trim() : 'User';
@@ -1351,7 +1481,6 @@
                 const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === oldId.toLowerCase());
                 session.username = newName;
                 if (userIdx !== -1) users[userIdx].username = newName;
-                
                 localStorage.setItem('flowstudy_session', JSON.stringify(session));
                 saveUsersDB(users);
             }
@@ -1361,20 +1490,15 @@
     function showCustomDialog(htmlContent, onSubmit) {
         customDialogBox.innerHTML = htmlContent;
         customDialogOverlay.classList.add('active');
-
         const cancelBtn = customDialogBox.querySelector('.dialog-cancel');
         const submitBtn = customDialogBox.querySelector('.dialog-submit');
-
         const close = () => {
             customDialogOverlay.classList.remove('active');
             customDialogBox.innerHTML = '';
         };
-
         if (cancelBtn) cancelBtn.onclick = close;
         if (submitBtn) submitBtn.onclick = () => {
-            if (onSubmit() !== false) {
-                close();
-            }
+            if (onSubmit() !== false) close();
         };
     }
 
@@ -1397,34 +1521,23 @@
             `, () => {
                 const newEmail = document.getElementById('dialog-new-email').value.trim();
                 const code = document.getElementById('dialog-code').value.trim();
-                if (!newEmail) {
-                    showToast('Error', 'Please enter a new email address.', 'error');
-                    return false;
-                }
-                if (code !== '1234') {
-                    showToast('Error', 'Invalid confirmation code. (Use 1234 for demo)', 'error');
-                    return false;
-                }
-                
+                if (!newEmail) { showToast('Error', 'Please enter a new email address.', 'error'); return false; }
+                if (code !== '1234') { showToast('Error', 'Invalid confirmation code. (Use 1234 for demo)', 'error'); return false; }
                 if (session) {
                     session.email = newEmail;
                     const users = getUsersDB();
                     const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
                     if (userIdx !== -1) users[userIdx].email = newEmail;
-                    
                     localStorage.setItem('flowstudy_session', JSON.stringify(session));
                     saveUsersDB(users);
                     applyUserData(session.username, session.id, session.email, session.is2fa);
                     showToast('Success', 'Email successfully updated!', 'success');
                 }
             });
-
             setTimeout(() => {
                 const sendCodeBtn = document.getElementById('send-code-btn');
                 if (sendCodeBtn) {
-                    sendCodeBtn.onclick = () => {
-                        showToast('Info', 'Confirmation code sent! (Demo code: 1234)', 'info');
-                    };
+                    sendCodeBtn.onclick = () => showToast('Info', 'Confirmation code sent! (Demo code: 1234)', 'info');
                 }
             }, 50);
         });
@@ -1446,14 +1559,8 @@
             `, () => {
                 const oldP = document.getElementById('dialog-old-pass').value;
                 const newP = document.getElementById('dialog-new-pass').value;
-                if (!oldP || !newP) {
-                    showToast('Error', 'Please fill in all fields.', 'error');
-                    return false;
-                }
-                if (newP.length < 4) {
-                    showToast('Error', 'Password must be at least 4 characters long.', 'error');
-                    return false;
-                }
+                if (!oldP || !newP) { showToast('Error', 'Please fill in all fields.', 'error'); return false; }
+                if (newP.length < 4) { showToast('Error', 'Password must be at least 4 characters long.', 'error'); return false; }
                 showToast('Success', 'Password successfully updated!', 'success');
             });
         });
@@ -1462,42 +1569,19 @@
     if (toggle2faBtn) {
         toggle2faBtn.addEventListener('click', () => {
             const isCurrentlyEnabled = session && session.is2fa;
-
-            if (isCurrentlyEnabled) {
-                showCustomDialog(`
-                    <h3>Disable 2FA</h3>
-                    <p>Enter your password to disable Two-Factor Authentication.</p>
-                    <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
-                    <div class="custom-dialog-actions">
-                        <button class="btn-secondary dialog-cancel">Cancel</button>
-                        <button class="btn-primary dialog-submit">Disable</button>
-                    </div>
-                `, () => {
-                    const pass = document.getElementById('dialog-2fa-pass').value;
-                    if (!pass) {
-                        showToast('Error', 'Password is required.', 'error');
-                        return false;
-                    }
-                    updateSession2FA(false);
-                });
-            } else {
-                showCustomDialog(`
-                    <h3>Enable 2FA</h3>
-                    <p>Confirm your password to enable Two-Factor Authentication.</p>
-                    <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
-                    <div class="custom-dialog-actions">
-                        <button class="btn-secondary dialog-cancel">Cancel</button>
-                        <button class="btn-primary dialog-submit">Enable</button>
-                    </div>
-                `, () => {
-                    const pass = document.getElementById('dialog-2fa-pass').value;
-                    if (!pass) {
-                        showToast('Error', 'Password is required.', 'error');
-                        return false;
-                    }
-                    updateSession2FA(true);
-                });
-            }
+            showCustomDialog(`
+                <h3>${isCurrentlyEnabled ? 'Disable 2FA' : 'Enable 2FA'}</h3>
+                <p>Enter your password to ${isCurrentlyEnabled ? 'disable' : 'enable'} Two-Factor Authentication.</p>
+                <input type="password" class="setting-input" id="dialog-2fa-pass" placeholder="Account password" style="margin-top: 5px;">
+                <div class="custom-dialog-actions">
+                    <button class="btn-secondary dialog-cancel">Cancel</button>
+                    <button class="btn-primary dialog-submit">${isCurrentlyEnabled ? 'Disable' : 'Enable'}</button>
+                </div>
+            `, () => {
+                const pass = document.getElementById('dialog-2fa-pass').value;
+                if (!pass) { showToast('Error', 'Password is required.', 'error'); return false; }
+                updateSession2FA(!isCurrentlyEnabled);
+            });
         });
     }
 
@@ -1507,7 +1591,6 @@
             const users = getUsersDB();
             const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
             if (userIdx !== -1) users[userIdx].is2fa = status;
-
             localStorage.setItem('flowstudy_session', JSON.stringify(session));
             saveUsersDB(users);
             applyUserData(session.username, session.id, session.email, session.is2fa);
@@ -1519,18 +1602,15 @@
         if (!adminUsersList) return;
         const users = getUsersDB();
         adminUsersList.innerHTML = '';
-
         if (users.length === 0) {
             adminUsersList.innerHTML = '<div style="color: #888; font-size: 14px;">No users found</div>';
             return;
         }
-
         users.forEach(u => {
             const userCleanId = cleanId(u.id);
             const isProtectedAdmin = userCleanId.toLowerCase() === 'knqw';
             const row = document.createElement('div');
             row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 14px;';
-            
             row.innerHTML = `
                 <div>
                     <strong style="color: #0f172a;">${u.username}</strong> 
@@ -1542,15 +1622,12 @@
                     : `<button class="delete-user-btn" data-id="${userCleanId}" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Delete</button>`
                 }
             `;
-
             adminUsersList.appendChild(row);
         });
-
         adminUsersList.querySelectorAll('.delete-user-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idToDelete = cleanId(e.target.getAttribute('data-id'));
-                let usersBefore = getUsersDB();
-                let updatedUsers = usersBefore.filter(u => cleanId(u.id).toLowerCase() !== idToDelete.toLowerCase());
+                let updatedUsers = getUsersDB().filter(u => cleanId(u.id).toLowerCase() !== idToDelete.toLowerCase());
                 saveUsersDB(updatedUsers);
                 renderAdminUsersList();
                 showToast('User Deleted', `User #${idToDelete} was removed.`, 'info');
@@ -1589,26 +1666,6 @@
         });
     }
 
-    const navItems = document.querySelectorAll('.nav-list .nav-item');
-    const viewSections = document.querySelectorAll('.view-section');
-
-    navItems.forEach(item => {
-        item.addEventListener('click', () => {
-            navItems.forEach(nav => nav.classList.remove('active'));
-            item.classList.add('active');
-
-            const view = item.getAttribute('data-view');
-            viewSections.forEach(section => {
-                section.classList.remove('active');
-            });
-
-            const targetSection = document.getElementById(`view-${view}`);
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-        });
-    });
-
     const modalOverlay = document.getElementById('settings-modal-overlay');
     const openSettingsBtn = document.getElementById('open-settings-btn');
     const profileSettingsBtn = document.getElementById('profile-settings-btn');
@@ -1620,10 +1677,7 @@
     if (openSettingsBtn) openSettingsBtn.addEventListener('click', (e) => { e.preventDefault(); openModal(); });
     if (profileSettingsBtn) profileSettingsBtn.addEventListener('click', openModal);
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
-
-    if (modalOverlay) {
-        modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
-    }
+    if (modalOverlay) modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
 
     const subscriptionsModalOverlay = document.getElementById('subscriptions-modal-overlay');
     const openSubscriptionsBtn = document.getElementById('open-subscriptions-btn');
@@ -1634,72 +1688,34 @@
     if (openSubscriptionsBtn) openSubscriptionsBtn.addEventListener('click', (e) => { e.preventDefault(); openSubsModal(); });
     const closeSubsBtnEl = document.getElementById('close-subscriptions-btn');
     if (closeSubsBtnEl) closeSubsBtnEl.addEventListener('click', closeSubsModal);
+    if (subscriptionsModalOverlay) subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
 
-    if (subscriptionsModalOverlay) {
-        subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
-    }
-
-    // Add a Class modal functionality
     const addClassModalOverlay = document.getElementById('add-class-modal-overlay');
-    const openAddClassBtn = document.getElementById('open-add-class-btn');
-    const closeAddClassBtn = document.getElementById('close-add-class-btn');
-
-    function openAddClassModal() { if (addClassModalOverlay) addClassModalOverlay.classList.add('active'); }
+    
+    function openAddClassModal() { 
+        if (addClassModalOverlay) {
+            updateIntegrationModalUI();
+            addClassModalOverlay.classList.add('active');
+        } 
+    }
     function closeAddClassModal() { if (addClassModalOverlay) addClassModalOverlay.classList.remove('active'); }
 
-    if (openAddClassBtn) openAddClassBtn.addEventListener('click', openAddClassModal);
+    const closeAddClassBtn = document.getElementById('close-add-class-btn');
     if (closeAddClassBtn) closeAddClassBtn.addEventListener('click', closeAddClassModal);
-
-    if (addClassModalOverlay) {
-        addClassModalOverlay.addEventListener('click', (e) => { if (e.target === addClassModalOverlay) closeAddClassModal(); });
-    }
-
-    // Connect integration buttons logic
-    const connectButtons = document.querySelectorAll('.integration-connect-btn');
-    connectButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const serviceName = btn.getAttribute('data-service');
-            const isConnected = btn.classList.contains('connected');
-
-            if (!isConnected) {
-                btn.classList.add('connected');
-                btn.textContent = 'Connected';
-                btn.style.backgroundColor = '#dcfce7';
-                btn.style.color = '#15803d';
-                btn.style.borderColor = '#bbf7d0';
-                showToast('Success', `Successfully connected to ${serviceName}!`, 'success');
-            } else {
-                btn.classList.remove('connected');
-                btn.textContent = 'Connect';
-                btn.style.backgroundColor = '#f1f5f9';
-                btn.style.color = '#0f172a';
-                btn.style.borderColor = '#cbd5e1';
-                showToast('Info', `Disconnected from ${serviceName}.`, 'info');
-            }
-        });
-    });
+    if (addClassModalOverlay) addClassModalOverlay.addEventListener('click', (e) => { if (e.target === addClassModalOverlay) closeAddClassModal(); });
 
     const billingToggleButtons = document.querySelectorAll('.billing-toggle .toggle-btn');
     billingToggleButtons.forEach(button => {
         button.addEventListener('click', () => {
             billingToggleButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-
             const period = button.getAttribute('data-period');
             const amounts = document.querySelectorAll('.subs-grid .amount');
             const periods = document.querySelectorAll('.subs-grid .period');
-
             amounts.forEach(amount => {
-                if (period === 'yearly') {
-                    amount.textContent = amount.getAttribute('data-yearly');
-                } else {
-                    amount.textContent = amount.getAttribute('data-monthly');
-                }
+                amount.textContent = period === 'yearly' ? amount.getAttribute('data-yearly') : amount.getAttribute('data-monthly');
             });
-
-            periods.forEach(p => {
-                p.textContent = period === 'yearly' ? '/ yr' : '/ mo';
-            });
+            periods.forEach(p => { p.textContent = period === 'yearly' ? '/ yr' : '/ mo'; });
         });
     });
 
@@ -1718,21 +1734,15 @@
         btn.addEventListener('click', () => {
             if (btn.id === 'logout-btn') return;
             const targetTab = btn.getAttribute('data-tab');
-
-            tabBtns.forEach(b => {
-                b.classList.remove('active');
-            });
+            tabBtns.forEach(b => b.classList.remove('active'));
             tabPanels.forEach(p => p.classList.remove('active'));
-
             btn.classList.add('active');
             const panel = document.getElementById(targetTab);
-            if (panel) panel.classList.add('active');
-
-            if (targetTab === 'tab-admin') {
-                renderAdminUsersList();
-            }
+            if (panel) panel.classList.0 ? panel.classList.add('active') : panel.classList.add('active');
+            if (targetTab === 'tab-admin') renderAdminUsersList();
         });
     });
+
+
+    renderDashboardClasses();
 </script>
-</body>
-</html>
