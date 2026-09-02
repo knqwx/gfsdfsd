@@ -925,9 +925,12 @@
                         <label class="setting-label">Username</label>
                         <input type="text" class="setting-input" id="username-input" placeholder="Enter username">
                     </div>
-                    <div class="setting-group">
-                        <label class="setting-label">Email Address</label>
-                        <input type="email" class="setting-input" id="email-input" placeholder="Enter email address">
+                    <div class="action-row">
+                        <div class="action-info">
+                            <span class="action-title">Email Address</span>
+                            <span class="action-desc" id="email-masked-desc">Not set</span>
+                        </div>
+                        <button class="btn-secondary" id="open-change-email-btn">Change Email</button>
                     </div>
                     <div class="action-row">
                         <div class="action-info">
@@ -1074,7 +1077,7 @@
 
     const usernameInput = document.getElementById('username-input');
     const userIdInput = document.getElementById('user-id-input');
-    const emailInput = document.getElementById('email-input');
+    const emailMaskedDesc = document.getElementById('email-masked-desc');
     const displayUsername = document.getElementById('display-username');
     const displayRole = document.getElementById('display-role');
     const avatarInitial = document.getElementById('avatar-initial');
@@ -1082,6 +1085,7 @@
     const adminUsersList = document.getElementById('admin-users-list');
     const logoutBtn = document.getElementById('logout-btn');
     
+    const openChangeEmailBtn = document.getElementById('open-change-email-btn');
     const openChangePasswordBtn = document.getElementById('open-change-password-btn');
     const toggle2faBtn = document.getElementById('toggle-2fa-btn');
     const faStatusDesc = document.getElementById('fa-status-desc');
@@ -1110,19 +1114,23 @@
 
     function getUsersDB() {
         const users = localStorage.getItem('flowstudy_users');
-        if (!users) {
-            const initialDefault = [
-                { id: 'knqw', username: 'admin', email: 'admin@mail.com', is2fa: false },
-                { id: '1', username: 'User', email: '', is2fa: false }
-            ];
-            localStorage.setItem('flowstudy_users', JSON.stringify(initialDefault));
-            return initialDefault;
-        }
-        return JSON.parse(users);
+        return users ? JSON.parse(users) : [];
     }
 
     function saveUsersDB(users) {
         localStorage.setItem('flowstudy_users', JSON.stringify(users));
+    }
+
+    function maskEmail(email) {
+        if (!email) return 'No email assigned';
+        const parts = email.split('@');
+        if (parts.length !== 2) return email;
+        const name = parts[0];
+        const domain = parts[1];
+        if (name.length <= 2) {
+            return `${name[0]}***@${domain}`;
+        }
+        return `${name[0]}***${name.slice(-1)}@${domain}`;
     }
 
     function applyUserData(name, id, email, is2fa) {
@@ -1133,7 +1141,7 @@
         if (avatarInitial) avatarInitial.textContent = cleanName.charAt(0).toUpperCase();
         if (usernameInput) usernameInput.value = cleanName;
         if (userIdInput) userIdInput.value = rawId;
-        if (emailInput) emailInput.value = email || '';
+        if (emailMaskedDesc) emailMaskedDesc.textContent = maskEmail(email);
 
         if (toggle2faBtn && faStatusDesc) {
             if (is2fa) {
@@ -1145,7 +1153,7 @@
             }
         }
 
-        const isAdmin = rawId.toLowerCase() === 'knqw';
+        const isAdmin = rawId.toLowerCase() === 'z';
         if (displayRole) displayRole.textContent = isAdmin ? 'Admin' : 'Student';
         if (adminTabBtn) adminTabBtn.style.display = isAdmin ? 'flex' : 'none';
     }
@@ -1156,11 +1164,12 @@
     if (session && session.username) {
         applyUserData(session.username, session.id, session.email, session.is2fa);
     } else {
-        const users = getUsersDB();
-        const defaultUser = users.find(u => cleanId(u.id).toLowerCase() === 'knqw') || users[0];
-        session = defaultUser;
-        localStorage.setItem('flowstudy_session', JSON.stringify(session));
-        applyUserData(session.username, session.id, session.email, session.is2fa);
+        const savedUser = localStorage.getItem('flowstudy_username');
+        if (savedUser) {
+            applyUserData(savedUser, 1, '', false);
+        } else {
+            applyUserData('User', '1', '', false);
+        }
     }
 
     if (usernameInput) {
@@ -1168,11 +1177,12 @@
             const newName = e.target.value.trim() || 'User';
             if (displayUsername) displayUsername.textContent = newName;
             if (avatarInitial) avatarInitial.textContent = newName.charAt(0).toUpperCase();
+            
+            localStorage.setItem('flowstudy_username', newName);
 
             if (session) {
                 const users = getUsersDB();
-                const oldId = cleanId(session.id);
-                const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === oldId.toLowerCase());
+                const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
                 session.username = newName;
                 if (userIdx !== -1) users[userIdx].username = newName;
                 
@@ -1184,41 +1194,18 @@
 
     if (userIdInput) {
         userIdInput.addEventListener('input', (e) => {
-            const newId = cleanId(e.target.value) || '1';
-
+            const newId = e.target.value.trim() || '1';
+            
             if (session) {
                 const users = getUsersDB();
-                const oldId = cleanId(session.id);
-                const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === oldId.toLowerCase());
-                
+                const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
                 session.id = newId;
                 if (userIdx !== -1) users[userIdx].id = newId;
                 
                 localStorage.setItem('flowstudy_session', JSON.stringify(session));
                 saveUsersDB(users);
-                
-                const isAdmin = newId.toLowerCase() === 'knqw';
-                if (displayRole) displayRole.textContent = isAdmin ? 'Admin' : 'Student';
-                if (adminTabBtn) adminTabBtn.style.display = isAdmin ? 'flex' : 'none';
             }
-        });
-    }
-
-    if (emailInput) {
-        emailInput.addEventListener('input', (e) => {
-            const newEmail = e.target.value.trim();
-
-            if (session) {
-                const users = getUsersDB();
-                const oldId = cleanId(session.id);
-                const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === oldId.toLowerCase());
-                
-                session.email = newEmail;
-                if (userIdx !== -1) users[userIdx].email = newEmail;
-                
-                localStorage.setItem('flowstudy_session', JSON.stringify(session));
-                saveUsersDB(users);
-            }
+            applyUserData(session ? session.username : 'User', newId, session ? session.email : '', session ? session.is2fa : false);
         });
     }
 
@@ -1240,6 +1227,63 @@
                 close();
             }
         };
+    }
+
+    let pendingNewEmail = '';
+    let emailVerificationCode = '';
+
+    if (openChangeEmailBtn) {
+        openChangeEmailBtn.addEventListener('click', () => {
+            showCustomDialog(`
+                <h3>Change Email Address</h3>
+                <p>Enter your new email address. We will send a confirmation code to it.</p>
+                <input type="email" class="setting-input" id="dialog-new-email" placeholder="newemail@example.com" value="">
+                <div class="custom-dialog-actions">
+                    <button class="btn-secondary dialog-cancel">Cancel</button>
+                    <button class="btn-primary dialog-submit">Send Code</button>
+                </div>
+            `, () => {
+                const val = document.getElementById('dialog-new-email').value.trim();
+                if (!val || !val.includes('@')) {
+                    showToast('Invalid Email', 'Please enter a valid email address.', 'error');
+                    return false;
+                }
+                pendingNewEmail = val;
+                emailVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+                
+                showToast('Code Sent', `Verification code sent to ${maskEmail(pendingNewEmail)} (Simulated code: ${emailVerificationCode})`, 'info', 6000);
+
+                setTimeout(() => {
+                    showCustomDialog(`
+                        <h3>Verify New Email</h3>
+                        <p>Enter the 6-digit code sent to <strong>${maskEmail(pendingNewEmail)}</strong>.</p>
+                        <input type="text" class="setting-input" id="dialog-email-code" placeholder="123456" maxlength="6">
+                        <div class="custom-dialog-actions">
+                            <button class="btn-secondary dialog-cancel">Cancel</button>
+                            <button class="btn-primary dialog-submit">Verify & Save</button>
+                        </div>
+                    `, () => {
+                        const enteredCode = document.getElementById('dialog-email-code').value.trim();
+                        if (enteredCode !== emailVerificationCode) {
+                            showToast('Error', 'Incorrect verification code.', 'error');
+                            return false;
+                        }
+
+                        if (session) {
+                            session.email = pendingNewEmail;
+                            const users = getUsersDB();
+                            const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
+                            if (userIdx !== -1) users[userIdx].email = pendingNewEmail;
+
+                            localStorage.setItem('flowstudy_session', JSON.stringify(session));
+                            saveUsersDB(users);
+                            applyUserData(session.username, session.id, session.email, session.is2fa);
+                            showToast('Success', 'Email address successfully updated!', 'success');
+                        }
+                    });
+                }, 150);
+            });
+        });
     }
 
     if (openChangePasswordBtn) {
@@ -1317,7 +1361,7 @@
         if (session) {
             session.is2fa = status;
             const users = getUsersDB();
-            const userIdx = users.findIndex(u => cleanId(u.id).toLowerCase() === cleanId(session.id).toLowerCase());
+            const userIdx = users.findIndex(u => cleanId(u.id) === cleanId(session.id));
             if (userIdx !== -1) users[userIdx].is2fa = status;
 
             localStorage.setItem('flowstudy_session', JSON.stringify(session));
@@ -1339,7 +1383,7 @@
 
         users.forEach(u => {
             const userCleanId = cleanId(u.id);
-            const isProtectedAdmin = userCleanId.toLowerCase() === 'knqw';
+            const isProtectedAdmin = userCleanId.toLowerCase() === 'z';
             const row = document.createElement('div');
             row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; font-size: 14px;';
             
@@ -1347,7 +1391,7 @@
                 <div>
                     <strong style="color: #0f172a;">${u.username}</strong> 
                     <span style="color: #64748b; font-size: 12px;">(#${userCleanId})</span>
-                    <div style="color: #64748b; font-size: 11px;">${u.email ? u.email : 'No email'}</div>
+                    <div style="color: #64748b; font-size: 11px;">${u.email ? maskEmail(u.email) : 'No email'}</div>
                 </div>
                 ${isProtectedAdmin 
                     ? '<span style="color: #94a3b8; font-size: 12px; font-weight: 500;">Protected</span>' 
@@ -1439,13 +1483,13 @@
 
     const subscriptionsModalOverlay = document.getElementById('subscriptions-modal-overlay');
     const openSubscriptionsBtn = document.getElementById('open-subscriptions-btn');
+    const closeSubscriptionsBtn = document.getElementById('close-subscriptions-btn');
 
     function openSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.add('active'); }
     function closeSubsModal() { if (subscriptionsModalOverlay) subscriptionsModalOverlay.classList.remove('active'); }
 
     if (openSubscriptionsBtn) openSubscriptionsBtn.addEventListener('click', (e) => { e.preventDefault(); openSubsModal(); });
-    const closeSubsBtnEl = document.getElementById('close-subscriptions-btn');
-    if (closeSubsBtnEl) closeSubsBtnEl.addEventListener('click', closeSubsModal);
+    if (closeSubscriptionsBtn) closeSubscriptionsBtn.addEventListener('click', closeSubsModal);
 
     if (subscriptionsModalOverlay) {
         subscriptionsModalOverlay.addEventListener('click', (e) => { if (e.target === subscriptionsModalOverlay) closeSubsModal(); });
@@ -1491,8 +1535,7 @@
             const targetTab = btn.getAttribute('data-tab');
 
             tabBtns.forEach(b => {
-                if (b.id !== 'logout-btn') b.classList.습 ? '' : b.classList.remove('active');
-                b.classList.remove('active');
+                if (b.id !== 'logout-btn') b.classList.remove('active');
             });
             tabPanels.forEach(p => p.classList.remove('active'));
 
