@@ -17,7 +17,6 @@
             box-sizing: border-box;
         }
 
-        /* Уровень в верхнем правом углу */
         .level-label {
             position: absolute;
             top: 20px;
@@ -26,7 +25,6 @@
             z-index: 10;
         }
 
-        /* Общий стиль для кнопок */
         .game-btn {
             background-color: #ffffff;
             border: 1px solid #000000;
@@ -41,7 +39,22 @@
             background-color: #f0f0f0;
         }
 
-        /* Сетка для 5 уровня (4 квадрата) */
+        /* Прыжок по комнатам в 1 комнате */
+        .room-jump-container {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .room-jump-container input {
+            padding: 5px;
+            width: 60px;
+            border: 1px solid #000;
+        }
+
+        /* Сетка для 5 уровня */
         .grid-container {
             display: none;
             position: absolute;
@@ -64,13 +77,12 @@
             background-color: #f0f0f0;
         }
 
-        /* Стили для 7 уровня (ввод текста) */
+        /* Ввод текста (Ур. 7) */
         .input-container {
             display: none;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 70%;
+            left: 20px;
         }
 
         .input-container input {
@@ -80,7 +92,7 @@
             outline: none;
         }
 
-        /* Кастомное модальное окно для 8 уровня */
+        /* Кастомное модальное окно (Ур. 8) */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -116,19 +128,79 @@
             cursor: pointer;
         }
 
-        .modal-buttons button:hover {
-            background-color: #f0f0f0;
+        /* Комната 9: Капча */
+        .captcha-container {
+            display: none;
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid #000;
+            padding: 15px;
+            background: #fff;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .invisible-cross {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            /* background: rgba(255,0,0,0.3); Раскомментируйте, чтобы увидеть невидимый крестик при отладке */
+        }
+
+        /* Комната 10: Вопрос Hello! */
+        .question-container {
+            display: none;
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .question-buttons {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .question-buttons button {
+            background: #fff;
+            border: 1px solid #000;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        /* Шестеренка в 11 уровне */
+        .gear-btn {
+            display: none;
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            font-size: 28px;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="level-label" id="levelDisplay">level: 0</div>
+    <div class="level-label" id="levelDisplay">level: 1</div>
 
-    <!-- Уровень 1: Кнопка START -->
+    <!-- Уровень 1: Кнопка START и Прыжок по комнатам -->
     <button class="game-btn" id="startBtn" style="display: block; top: 50px; left: 20px;" onclick="startAction()">start</button>
+    <div class="room-jump-container" id="roomJumpContainer">
+        <input type="number" id="roomJumpInput" min="1" max="1000" placeholder="Room">
+        <button class="game-btn" id="goBtn" style="display:inline-block; position:static;" onclick="jumpToRoom()">Go</button>
+    </div>
 
-    <!-- Уровни 2, 3, 4: Кнопка END -->
+    <!-- Уровень 2, 3, 4: Кнопка END -->
     <button class="game-btn" id="endBtn" onclick="endAction()">end</button>
 
     <!-- Уровень 3, 4: Кнопка HERE -->
@@ -142,7 +214,7 @@
         <div class="square" id="sq3" onclick="checkSquare(3)"></div>
     </div>
 
-    <!-- Уровень 6: Кнопка ADD TEXT (появится в правом углу) -->
+    <!-- Уровень 6: Кнопка ADD TEXT -->
     <button class="game-btn" id="addTextBtn" style="top: 20px; right: 100px;" onclick="addTextAction()">add text</button>
 
     <!-- Уровень 7: Поле ввода текста -->
@@ -165,8 +237,26 @@
         </div>
     </div>
 
+    <!-- Уровень 9: Are you a robot? -->
+    <div class="captcha-container" id="captchaContainer">
+        <label><input type="checkbox" id="robotCheckbox" onclick="clickRobotCheckbox()"> Are you a robot?</label>
+        <div class="invisible-cross" onclick="clickInvisibleCross()" title="Safe path"></div>
+    </div>
+
+    <!-- Уровень 10: Вопрос Hello! -->
+    <div class="question-container" id="questionContainer">
+        <p>Hello!</p>
+        <div class="question-buttons">
+            <button onclick="answerHello('hi')">Hi</button>
+            <button onclick="answerHello('what')">What</button>
+        </div>
+    </div>
+
+    <!-- Уровень 11: Шестеренка -->
+    <button class="gear-btn" id="gearBtn" onclick="alert('Gear clicked! Room 11 reached.')">⚙️</button>
+
     <script>
-        let currentLevel = 0;
+        let currentLevel = 1;
         let actionClicks = 0;
         let correctSquareIndex = 0;
 
@@ -183,77 +273,95 @@
             btn.style.top = randomY + 'px';
         }
 
+        // --- ПРЫЖОК ПО КОМНАТАМ ИЗ ПЕРВОЙ ---
+        function jumpToRoom() {
+            const val = parseInt(document.getElementById('roomJumpInput').value);
+            if (!isNaN(val) && val >= 1 && val <= 1000) {
+                goToRoom(val);
+            } else {
+                alert('Enter a valid room number from 1 to 1000');
+            }
+        }
+
+        function goToRoom(targetLevel) {
+            currentLevel = targetLevel;
+            updateLevel();
+
+            // Активируем нужные элементы в зависимости от уровня, сохраняя предыдущие
+            if (targetLevel >= 2) document.getElementById('startBtn').style.display = 'block';
+            if (targetLevel >= 2) {
+                const endBtn = document.getElementById('endBtn');
+                endBtn.style.display = 'block';
+                getRandomPosition(endBtn);
+            }
+            if (targetLevel >= 3) {
+                const hereBtn = document.getElementById('hereBtn');
+                hereBtn.style.display = 'block';
+                getRandomPosition(hereBtn);
+            }
+            if (targetLevel >= 5) {
+                document.getElementById('gridContainer').style.display = 'grid';
+            }
+            if (targetLevel >= 6) {
+                document.getElementById('addTextBtn').style.display = 'block';
+            }
+            if (targetLevel >= 7) {
+                document.getElementById('inputContainer').style.display = 'block';
+            }
+            if (targetLevel >= 8) {
+                const trashBtn = document.getElementById('trashBtn');
+                trashBtn.style.display = 'block';
+                getRandomPosition(trashBtn);
+            }
+            if (targetLevel >= 9) {
+                document.getElementById('captchaContainer').style.display = 'flex';
+            }
+            if (targetLevel >= 10) {
+                document.getElementById('questionContainer').style.display = 'block';
+            }
+            if (targetLevel >= 11) {
+                document.getElementById('gearBtn').style.display = 'block';
+            }
+        }
+
         // --- УРОВЕНЬ 1 -> 2 ---
         function startAction() {
-            currentLevel = 2;
-            updateLevel();
-            document.getElementById('startBtn').style.display = 'none';
-
-            // Уровень 2: кнопка end на 1 клик
-            actionClicks = 0;
-            const endBtn = document.getElementById('endBtn');
-            endBtn.style.display = 'block';
-            getRandomPosition(endBtn);
+            goToRoom(2);
         }
 
         // --- КЛИКИ ПО END (Ур. 2) ---
         function endAction() {
             if (currentLevel === 2) {
-                // Переход в Уровень 3
-                currentLevel = 3;
-                updateLevel();
-                document.getElementById('endBtn').style.display = 'none';
-
-                // Появляется кнопка HERE (требует 2 клика)
+                goToRoom(3);
                 actionClicks = 0;
-                const hereBtn = document.getElementById('hereBtn');
-                hereBtn.style.display = 'block';
-                getRandomPosition(hereBtn);
             }
         }
 
         // --- КЛИКИ ПО HERE (Ур. 3 и 4) ---
         function hereAction() {
             actionClicks++;
-            if (currentLevel === 3) {
-                if (actionClicks >= 2) {
-                    // Переход в Уровень 4
-                    currentLevel = 4;
-                    updateLevel();
-                    actionClicks = 0; // Сбрасываем для 3 кликов
-                    const hereBtn = document.getElementById('hereBtn');
-                    getRandomPosition(hereBtn);
-                }
-            } else if (currentLevel === 4) {
-                if (actionClicks >= 3) {
-                    // Переход в Уровень 5 (Квадраты)
-                    currentLevel = 5;
-                    updateLevel();
-                    document.getElementById('hereBtn').style.display = 'none';
-                    startLevelFive();
-                }
+            if (currentLevel === 3 && actionClicks >= 2) {
+                goToRoom(4);
+                actionClicks = 0;
+                const hereBtn = document.getElementById('hereBtn');
+                getRandomPosition(hereBtn);
+            } else if (currentLevel === 4 && actionClicks >= 3) {
+                goToRoom(5);
+                document.getElementById('gridContainer').style.display = 'grid';
+                startLevelFive();
             }
         }
 
         // --- УРОВЕНЬ 5 (Квадраты) ---
         function startLevelFive() {
             correctSquareIndex = Math.floor(Math.random() * 4);
-            document.getElementById('gridContainer').style.display = 'grid';
         }
 
         function checkSquare(index) {
             if (index === correctSquareIndex) {
-                // Делаем правильный квадрат зеленым
                 document.getElementById('sq' + index).style.backgroundColor = '#00ff00';
-                
                 setTimeout(() => {
-                    document.getElementById('gridContainer').style.display = 'none';
-                    // Сбрасываем цвет квадратов обратно
-                    for(let i=0; i<4; i++) {
-                        document.getElementById('sq' + i).style.backgroundColor = '#ffffff';
-                    }
-                    // Переход в Уровень 6
-                    startLevelSix();
+                    goToRoom(6);
                 }, 500);
             } else {
                 alert('Wrong! Game over. Restarting...');
@@ -262,42 +370,24 @@
         }
 
         // --- УРОВЕНЬ 6 (Add Text) ---
-        function startLevelSix() {
-            currentLevel = 6;
-            updateLevel();
-            const addTextBtn = document.getElementById('addTextBtn');
-            addTextBtn.style.display = 'block';
-        }
-
         function addTextAction() {
             if (currentLevel === 6) {
-                currentLevel = 7;
-                updateLevel();
-                document.getElementById('addTextBtn').style.display = 'none';
-                
-                // Переходим к вводу текста
-                document.getElementById('inputContainer').style.display = 'block';
-                document.getElementById('textInput').focus();
+                goToRoom(7);
             }
         }
 
         // --- УРОВЕНЬ 7 (Ввод текста) ---
         function handleInputKey(event) {
             if (event.key === 'Enter') {
-                currentLevel = 8;
-                updateLevel();
-                document.getElementById('inputContainer').style.display = 'none';
-
-                // Появляется кнопка мусорки
+                goToRoom(8);
                 const trashBtn = document.getElementById('trashBtn');
-                trashBtn.style.display = 'block';
                 getRandomPosition(trashBtn);
             }
         }
 
-        // --- УРОВЕНЬ 8 (Мусорка и модалка) ---
+        // --- УРОВЕНЬ 8 (Мусорка) ---
         function openTrashModal() {
-            if (currentLevel === 8) {
+            if (currentLevel >= 8) {
                 document.getElementById('trashModal').style.display = 'flex';
             }
         }
@@ -307,27 +397,49 @@
             const addTextBtn = document.getElementById('addTextBtn');
 
             if (choice === 'yes') {
-                // Уберется полностью
                 addTextBtn.style.display = 'none';
             } else if (choice === 'maybe') {
-                // Уберется на половину (становится полупрозрачным)
                 addTextBtn.style.display = 'block';
                 addTextBtn.style.opacity = '0.5';
             } else if (choice === 'no') {
-                // Останется как было
                 addTextBtn.style.display = 'block';
                 addTextBtn.style.opacity = '1';
             }
             
-            // Переход дальше (или завершение текущей цепочки)
-            currentLevel = 9;
-            updateLevel();
-            alert('Room 8 completed!');
+            goToRoom(9);
+            document.getElementById('captchaContainer').style.display = 'flex';
+        }
+
+        // --- УРОВЕНЬ 9 (Капча) ---
+        function clickRobotCheckbox() {
+            // Если нажал галочку — игра сначала
+            alert('You are a robot! Game over.');
+            resetGame();
+        }
+
+        function clickInvisibleCross() {
+            // Если нажал невидимый крестик рядом — проходим в комнату 10
+            goToRoom(10);
+            document.getElementById('captchaContainer').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'block';
+        }
+
+        // --- УРОВЕНЬ 10 (Вопрос Hello!) ---
+        function answerHello(ans) {
+            if (ans === 'hi') {
+                // Переходим в 11 уровень, появляется шестеренка
+                goToRoom(11);
+                document.getElementById('questionContainer').style.display = 'none';
+                document.getElementById('gearBtn').style.display = 'block';
+            } else {
+                alert('Wrong choice! Game over.');
+                resetGame();
+            }
         }
 
         // --- СБРОС ИГРЫ ---
         function resetGame() {
-            currentLevel = 0;
+            currentLevel = 1;
             updateLevel();
             actionClicks = 0;
             
@@ -339,6 +451,11 @@
             document.getElementById('inputContainer').style.display = 'none';
             document.getElementById('trashBtn').style.display = 'none';
             document.getElementById('trashModal').style.display = 'none';
+            document.getElementById('captchaContainer').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('gearBtn').style.display = 'none';
+            document.getElementById('robotCheckbox').checked = false;
+            document.getElementById('roomJumpInput').value = '';
 
             for(let i=0; i<4; i++) {
                 document.getElementById('sq' + i).style.backgroundColor = '#ffffff';
