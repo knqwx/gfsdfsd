@@ -17,7 +17,7 @@
             box-sizing: border-box;
         }
 
-        /* Надпись level в верхнем правом углу */
+        /* Уровень в верхнем правом углу */
         .level-label {
             position: absolute;
             top: 20px;
@@ -26,7 +26,7 @@
             z-index: 10;
         }
 
-        /* Стандартная кнопка */
+        /* Общий стиль для кнопок */
         .game-btn {
             background-color: #ffffff;
             border: 1px solid #000000;
@@ -34,6 +34,7 @@
             font-size: 16px;
             cursor: pointer;
             position: absolute;
+            display: none;
         }
 
         .game-btn:hover {
@@ -62,112 +63,287 @@
         .square:hover {
             background-color: #f0f0f0;
         }
+
+        /* Стили для 7 уровня (ввод текста) */
+        .input-container {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .input-container input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #000;
+            outline: none;
+        }
+
+        /* Кастомное модальное окно для 8 уровня */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .modal-buttons {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+
+        .modal-buttons button:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 <body>
 
     <div class="level-label" id="levelDisplay">level: 0</div>
 
-    <!-- Кнопка Start -->
-    <button class="game-btn" id="startBtn" style="top: 50px; left: 20px;" onclick="startAction()">start</button>
+    <!-- Уровень 1: Кнопка START -->
+    <button class="game-btn" id="startBtn" style="display: block; top: 50px; left: 20px;" onclick="startAction()">start</button>
 
-    <!-- Кнопка End (появляется в рандомных местах) -->
-    <button class="game-btn" id="endBtn" style="display: none;" onclick="endAction()">end</button>
+    <!-- Уровни 2, 3, 4: Кнопка END -->
+    <button class="game-btn" id="endBtn" onclick="endAction()">end</button>
 
-    <!-- Контейнер для 5 уровня (4 квадрата) -->
+    <!-- Уровень 3, 4: Кнопка HERE -->
+    <button class="game-btn" id="hereBtn" onclick="hereAction()">here</button>
+
+    <!-- Уровень 5: 4 квадрата -->
     <div class="grid-container" id="gridContainer">
-        <div class="square" onclick="checkSquare(0)"></div>
-        <div class="square" onclick="checkSquare(1)"></div>
-        <div class="square" onclick="checkSquare(2)"></div>
-        <div class="square" onclick="checkSquare(3)"></div>
+        <div class="square" id="sq0" onclick="checkSquare(0)"></div>
+        <div class="square" id="sq1" onclick="checkSquare(1)"></div>
+        <div class="square" id="sq2" onclick="checkSquare(2)"></div>
+        <div class="square" id="sq3" onclick="checkSquare(3)"></div>
+    </div>
+
+    <!-- Уровень 6: Кнопка ADD TEXT (появится в правом углу) -->
+    <button class="game-btn" id="addTextBtn" style="top: 20px; right: 100px;" onclick="addTextAction()">add text</button>
+
+    <!-- Уровень 7: Поле ввода текста -->
+    <div class="input-container" id="inputContainer">
+        <input type="text" id="textInput" placeholder="Type and press Enter..." onkeydown="handleInputKey(event)">
+    </div>
+
+    <!-- Уровень 8: Кнопка Мусорки -->
+    <button class="game-btn" id="trashBtn" onclick="openTrashModal()">🗑️</button>
+
+    <!-- Кастомное модальное окно (Уровень 8) -->
+    <div class="modal-overlay" id="trashModal">
+        <div class="modal-box">
+            <p>are u sure u want to remove!</p>
+            <div class="modal-buttons">
+                <button onclick="resolveTrash('yes')">Yes</button>
+                <button onclick="resolveTrash('maybe')">Maybe</button>
+                <button onclick="resolveTrash('no')">No</button>
+            </div>
+        </div>
     </div>
 
     <script>
         let currentLevel = 0;
-        let clicksNeeded = 0;
-        let currentClicks = 0;
+        let actionClicks = 0;
         let correctSquareIndex = 0;
-
-        function getRandomPosition(btn) {
-            // Ограничения, чтобы кнопка не улетала за пределы экрана
-            const maxX = window.innerWidth - 120;
-            const maxY = window.innerHeight - 60;
-            const randomX = Math.floor(Math.random() * (maxX - 50)) + 20;
-            const randomY = Math.floor(Math.random() * (maxY - 100)) + 50;
-
-            btn.style.left = randomX + 'px';
-            btn.style.top = randomY + 'px';
-        }
 
         function updateLevel() {
             document.getElementById('levelDisplay').innerText = 'level: ' + currentLevel;
         }
 
-        function startAction() {
-            currentLevel = 1;
-            updateLevel();
-            
-            document.getElementById('startBtn').style.display = 'none';
-            
-            // Переходим к уровню 2 (требует 2 клика)
-            setupEndButton(2);
+        function getRandomPosition(btn) {
+            const maxX = window.innerWidth - 120;
+            const maxY = window.innerHeight - 60;
+            const randomX = Math.floor(Math.random() * (maxX - 50)) + 20;
+            const randomY = Math.floor(Math.random() * (maxY - 100)) + 50;
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
         }
 
-        function setupEndButton(clicks) {
-            currentLevel++;
+        // --- УРОВЕНЬ 1 -> 2 ---
+        function startAction() {
+            currentLevel = 2;
             updateLevel();
-            
-            if (currentLevel > 4) {
-                // Если прошли 4 уровень, переходим к 5 уровню (квадраты)
-                document.getElementById('endBtn').style.display = 'none';
-                startLevelFive();
-                return;
-            }
+            document.getElementById('startBtn').style.display = 'none';
 
-            clicksNeeded = clicks;
-            currentClicks = 0;
-
+            // Уровень 2: кнопка end на 1 клик
+            actionClicks = 0;
             const endBtn = document.getElementById('endBtn');
             endBtn.style.display = 'block';
             getRandomPosition(endBtn);
         }
 
+        // --- КЛИКИ ПО END (Ур. 2) ---
         function endAction() {
-            currentClicks++;
-            
-            // Если сделали нужное количество кликов для текущего уровня
-            if (currentClicks >= clicksNeeded) {
-                // Следующий уровень требует на 1 клик больше (на 3 уровне — 3 клика, на 4 — 4 клика)
-                setupEndButton(currentLevel + 1);
+            if (currentLevel === 2) {
+                // Переход в Уровень 3
+                currentLevel = 3;
+                updateLevel();
+                document.getElementById('endBtn').style.display = 'none';
+
+                // Появляется кнопка HERE (требует 2 клика)
+                actionClicks = 0;
+                const hereBtn = document.getElementById('hereBtn');
+                hereBtn.style.display = 'block';
+                getRandomPosition(hereBtn);
             }
         }
 
-        function startLevelFive() {
-            currentLevel = 5;
-            updateLevel();
+        // --- КЛИКИ ПО HERE (Ур. 3 и 4) ---
+        function hereAction() {
+            actionClicks++;
+            if (currentLevel === 3) {
+                if (actionClicks >= 2) {
+                    // Переход в Уровень 4
+                    currentLevel = 4;
+                    updateLevel();
+                    actionClicks = 0; // Сбрасываем для 3 кликов
+                    const hereBtn = document.getElementById('hereBtn');
+                    getRandomPosition(hereBtn);
+                }
+            } else if (currentLevel === 4) {
+                if (actionClicks >= 3) {
+                    // Переход в Уровень 5 (Квадраты)
+                    currentLevel = 5;
+                    updateLevel();
+                    document.getElementById('hereBtn').style.display = 'none';
+                    startLevelFive();
+                }
+            }
+        }
 
-            // Выбираем случайный правильный квадрат (от 0 до 3)
+        // --- УРОВЕНЬ 5 (Квадраты) ---
+        function startLevelFive() {
             correctSquareIndex = Math.floor(Math.random() * 4);
             document.getElementById('gridContainer').style.display = 'grid';
         }
 
         function checkSquare(index) {
             if (index === correctSquareIndex) {
-                alert('Correct! (You can continue expanding levels later)');
-                // Здесь можно продолжить игру дальше, если потребуется
+                // Делаем правильный квадрат зеленым
+                document.getElementById('sq' + index).style.backgroundColor = '#00ff00';
+                
+                setTimeout(() => {
+                    document.getElementById('gridContainer').style.display = 'none';
+                    // Сбрасываем цвет квадратов обратно
+                    for(let i=0; i<4; i++) {
+                        document.getElementById('sq' + i).style.backgroundColor = '#ffffff';
+                    }
+                    // Переход в Уровень 6
+                    startLevelSix();
+                }, 500);
             } else {
                 alert('Wrong! Game over. Restarting...');
                 resetGame();
             }
         }
 
+        // --- УРОВЕНЬ 6 (Add Text) ---
+        function startLevelSix() {
+            currentLevel = 6;
+            updateLevel();
+            const addTextBtn = document.getElementById('addTextBtn');
+            addTextBtn.style.display = 'block';
+        }
+
+        function addTextAction() {
+            if (currentLevel === 6) {
+                currentLevel = 7;
+                updateLevel();
+                document.getElementById('addTextBtn').style.display = 'none';
+                
+                // Переходим к вводу текста
+                document.getElementById('inputContainer').style.display = 'block';
+                document.getElementById('textInput').focus();
+            }
+        }
+
+        // --- УРОВЕНЬ 7 (Ввод текста) ---
+        function handleInputKey(event) {
+            if (event.key === 'Enter') {
+                currentLevel = 8;
+                updateLevel();
+                document.getElementById('inputContainer').style.display = 'none';
+
+                // Появляется кнопка мусорки
+                const trashBtn = document.getElementById('trashBtn');
+                trashBtn.style.display = 'block';
+                getRandomPosition(trashBtn);
+            }
+        }
+
+        // --- УРОВЕНЬ 8 (Мусорка и модалка) ---
+        function openTrashModal() {
+            if (currentLevel === 8) {
+                document.getElementById('trashModal').style.display = 'flex';
+            }
+        }
+
+        function resolveTrash(choice) {
+            document.getElementById('trashModal').style.display = 'none';
+            const addTextBtn = document.getElementById('addTextBtn');
+
+            if (choice === 'yes') {
+                // Уберется полностью
+                addTextBtn.style.display = 'none';
+            } else if (choice === 'maybe') {
+                // Уберется на половину (становится полупрозрачным)
+                addTextBtn.style.display = 'block';
+                addTextBtn.style.opacity = '0.5';
+            } else if (choice === 'no') {
+                // Останется как было
+                addTextBtn.style.display = 'block';
+                addTextBtn.style.opacity = '1';
+            }
+            
+            // Переход дальше (или завершение текущей цепочки)
+            currentLevel = 9;
+            updateLevel();
+            alert('Room 8 completed!');
+        }
+
+        // --- СБРОС ИГРЫ ---
         function resetGame() {
             currentLevel = 0;
             updateLevel();
+            actionClicks = 0;
             
             document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('endBtn').style.display = 'none';
-            
+            document.getElementById('hereBtn').style.display = 'none';
+            document.getElementById('addTextBtn').style.display = 'none';
+            document.getElementById('addTextBtn').style.opacity = '1';
+            document.getElementById('inputContainer').style.display = 'none';
+            document.getElementById('trashBtn').style.display = 'none';
+            document.getElementById('trashModal').style.display = 'none';
+
+            for(let i=0; i<4; i++) {
+                document.getElementById('sq' + i).style.backgroundColor = '#ffffff';
+            }
+
             const startBtn = document.getElementById('startBtn');
             startBtn.style.display = 'block';
             startBtn.style.top = '50px';
