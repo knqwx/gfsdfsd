@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>1000 rooms</title>
@@ -9,55 +9,57 @@
             color: #000000;
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            width: 100vw;
             height: 100vh;
             position: relative;
+            overflow: hidden;
             box-sizing: border-box;
         }
 
-        /* Надпись level в углу */
+        /* Надпись level в верхнем правом углу */
         .level-label {
             position: absolute;
             top: 20px;
             right: 20px;
             font-size: 18px;
+            z-index: 10;
         }
 
-        /* Название сайта */
-        h1 {
-            font-size: 24px;
-            font-weight: normal;
-            margin-top: 0;
-        }
-
-        /* Кнопка START */
-        .start-btn {
+        /* Стандартная кнопка */
+        .game-btn {
             background-color: #ffffff;
             border: 1px solid #000000;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 20px;
+            position: absolute;
         }
 
-        .start-btn:hover {
+        .game-btn:hover {
             background-color: #f0f0f0;
         }
 
-        /* Кнопка END, которая появляется в другом месте */
-        .end-btn {
+        /* Сетка для 5 уровня (4 квадрата) */
+        .grid-container {
+            display: none;
             position: absolute;
-            bottom: 50px;
-            right: 100px;
-            background-color: #ffffff;
-            border: 1px solid #000000;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            display: none; /* Скрыта по умолчанию */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            grid-template-columns: repeat(2, 100px);
+            grid-gap: 15px;
         }
 
-        .end-btn:hover {
+        .square {
+            width: 100px;
+            height: 100px;
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            cursor: pointer;
+        }
+
+        .square:hover {
             background-color: #f0f0f0;
         }
     </style>
@@ -66,34 +68,110 @@
 
     <div class="level-label" id="levelDisplay">level: 0</div>
 
-    <h1 id="roomTitle">1000 rooms</h1>
+    <!-- Кнопка Start -->
+    <button class="game-btn" id="startBtn" style="top: 50px; left: 20px;" onclick="startAction()">start</button>
 
-    <button class="start-btn" id="startBtn" onclick="nextLevel()">start</button>
+    <!-- Кнопка End (появляется в рандомных местах) -->
+    <button class="game-btn" id="endBtn" style="display: none;" onclick="endAction()">end</button>
 
-    <button class="end-btn" id="endBtn" onclick="nextRoom()">end</button>
+    <!-- Контейнер для 5 уровня (4 квадрата) -->
+    <div class="grid-container" id="gridContainer">
+        <div class="square" onclick="checkSquare(0)"></div>
+        <div class="square" onclick="checkSquare(1)"></div>
+        <div class="square" onclick="checkSquare(2)"></div>
+        <div class="square" onclick="checkSquare(3)"></div>
+    </div>
 
     <script>
         let currentLevel = 0;
-        let currentRoom = 1;
+        let clicksNeeded = 0;
+        let currentClicks = 0;
+        let correctSquareIndex = 0;
 
-        function nextLevel() {
-            currentLevel = 1;
-            document.getElementById('levelDisplay').innerText = 'level: ' + currentLevel;
-            
-            // Скрываем кнопку старт и показываем кнопку end в другом месте
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('endBtn').style.display = 'block';
+        function getRandomPosition(btn) {
+            // Ограничения, чтобы кнопка не улетала за пределы экрана
+            const maxX = window.innerWidth - 120;
+            const maxY = window.innerHeight - 60;
+            const randomX = Math.floor(Math.random() * (maxX - 50)) + 20;
+            const randomY = Math.floor(Math.random() * (maxY - 100)) + 50;
+
+            btn.style.left = randomX + 'px';
+            btn.style.top = randomY + 'px';
         }
 
-        function nextRoom() {
-            currentRoom = 2;
-            currentLevel = 2;
-            
-            document.getElementById('roomTitle').innerText = 'Комната ' + currentRoom;
+        function updateLevel() {
             document.getElementById('levelDisplay').innerText = 'level: ' + currentLevel;
+        }
+
+        function startAction() {
+            currentLevel = 1;
+            updateLevel();
             
-            // Скрываем кнопку end после нажатия
+            document.getElementById('startBtn').style.display = 'none';
+            
+            // Переходим к уровню 2 (требует 2 клика)
+            setupEndButton(2);
+        }
+
+        function setupEndButton(clicks) {
+            currentLevel++;
+            updateLevel();
+            
+            if (currentLevel > 4) {
+                // Если прошли 4 уровень, переходим к 5 уровню (квадраты)
+                document.getElementById('endBtn').style.display = 'none';
+                startLevelFive();
+                return;
+            }
+
+            clicksNeeded = clicks;
+            currentClicks = 0;
+
+            const endBtn = document.getElementById('endBtn');
+            endBtn.style.display = 'block';
+            getRandomPosition(endBtn);
+        }
+
+        function endAction() {
+            currentClicks++;
+            
+            // Если сделали нужное количество кликов для текущего уровня
+            if (currentClicks >= clicksNeeded) {
+                // Следующий уровень требует на 1 клик больше (на 3 уровне — 3 клика, на 4 — 4 клика)
+                setupEndButton(currentLevel + 1);
+            }
+        }
+
+        function startLevelFive() {
+            currentLevel = 5;
+            updateLevel();
+
+            // Выбираем случайный правильный квадрат (от 0 до 3)
+            correctSquareIndex = Math.floor(Math.random() * 4);
+            document.getElementById('gridContainer').style.display = 'grid';
+        }
+
+        function checkSquare(index) {
+            if (index === correctSquareIndex) {
+                alert('Correct! (You can continue expanding levels later)');
+                // Здесь можно продолжить игру дальше, если потребуется
+            } else {
+                alert('Wrong! Game over. Restarting...');
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            currentLevel = 0;
+            updateLevel();
+            
+            document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('endBtn').style.display = 'none';
+            
+            const startBtn = document.getElementById('startBtn');
+            startBtn.style.display = 'block';
+            startBtn.style.top = '50px';
+            startBtn.style.left = '20px';
         }
     </script>
 
