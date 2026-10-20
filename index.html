@@ -39,6 +39,13 @@
             background-color: #f0f0f0;
         }
 
+        /* Кнопка в заблокированном состоянии */
+        .game-btn.used {
+            cursor: default;
+            background-color: #e0e0e0;
+            color: #7f7f7f;
+        }
+
         /* Прыжок по комнатам в 1 комнате */
         .room-jump-container {
             position: absolute;
@@ -128,26 +135,30 @@
             cursor: pointer;
         }
 
-        /* Комната 9: Капча */
+        /* Комната 9: Капча в левом верхнем углу */
         .captcha-container {
             display: none;
             position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 20px;
+            left: 20px;
             border: 1px solid #000;
-            padding: 15px;
+            padding: 10px;
             background: #fff;
             align-items: center;
-            gap: 10px;
-            font-size: 16px;
+            gap: 8px;
+            font-size: 14px;
+            z-index: 20;
         }
 
-        .invisible-cross {
-            width: 20px;
-            height: 20px;
+        .captcha-btn {
+            background: #fff;
+            border: 1px solid #000;
+            padding: 2px 8px;
             cursor: pointer;
-            /* background: rgba(255,0,0,0.3); Раскомментируйте, чтобы увидеть невидимый крестик при отладке */
+            font-size: 14px;
+        }
+        .captcha-btn:hover {
+            background: #f0f0f0;
         }
 
         /* Комната 10: Вопрос Hello! */
@@ -200,11 +211,11 @@
         <button class="game-btn" id="goBtn" style="display:inline-block; position:static;" onclick="jumpToRoom()">Go</button>
     </div>
 
-    <!-- Уровень 2, 3, 4: Кнопка END -->
-    <button class="game-btn" id="endBtn" onclick="endAction()">end</button>
+    <!-- Уровень 2, 3, 4: Кнопка END (фиксированная позиция) -->
+    <button class="game-btn" id="endBtn" style="top: 150px; left: 150px;" onclick="endAction()">end</button>
 
-    <!-- Уровень 3, 4: Кнопка HERE -->
-    <button class="game-btn" id="hereBtn" onclick="hereAction()">here</button>
+    <!-- Уровень 3, 4: Кнопка HERE (фиксированная позиция) -->
+    <button class="game-btn" id="hereBtn" style="top: 200px; left: 150px;" onclick="hereAction()">here</button>
 
     <!-- Уровень 5: 4 квадрата -->
     <div class="grid-container" id="gridContainer">
@@ -222,8 +233,8 @@
         <input type="text" id="textInput" placeholder="Type and press Enter..." onkeydown="handleInputKey(event)">
     </div>
 
-    <!-- Уровень 8: Кнопка Мусорки -->
-    <button class="game-btn" id="trashBtn" onclick="openTrashModal()">🗑️</button>
+    <!-- Уровень 8: Кнопка Мусорки (фиксированная позиция) -->
+    <button class="game-btn" id="trashBtn" style="top: 250px; left: 150px;" onclick="openTrashModal()">🗑️</button>
 
     <!-- Кастомное модальное окно (Уровень 8) -->
     <div class="modal-overlay" id="trashModal">
@@ -237,10 +248,11 @@
         </div>
     </div>
 
-    <!-- Уровень 9: Are you a robot? -->
+    <!-- Уровень 9: Are you a robot? в левом верхнем углу -->
     <div class="captcha-container" id="captchaContainer">
-        <label><input type="checkbox" id="robotCheckbox" onclick="clickRobotCheckbox()"> Are you a robot?</label>
-        <div class="invisible-cross" onclick="clickInvisibleCross()" title="Safe path"></div>
+        <span>Are you a robot?</span>
+        <button class="captcha-btn" onclick="clickRobotCheck()">✔️</button>
+        <button class="captcha-btn" onclick="clickRobotCross()">❌</button>
     </div>
 
     <!-- Уровень 10: Вопрос Hello! -->
@@ -259,21 +271,16 @@
         let currentLevel = 1;
         let actionClicks = 0;
         let correctSquareIndex = 0;
+        let startUsed = false;
+        let endUsed = false;
+        let hereUsed = false;
+        let trashUsed = false;
+        let captchaPassed = false;
 
         function updateLevel() {
             document.getElementById('levelDisplay').innerText = 'level: ' + currentLevel;
         }
 
-        function getRandomPosition(btn) {
-            const maxX = window.innerWidth - 120;
-            const maxY = window.innerHeight - 60;
-            const randomX = Math.floor(Math.random() * (maxX - 50)) + 20;
-            const randomY = Math.floor(Math.random() * (maxY - 100)) + 50;
-            btn.style.left = randomX + 'px';
-            btn.style.top = randomY + 'px';
-        }
-
-        // --- ПРЫЖОК ПО КОМНАТАМ ИЗ ПЕРВОЙ ---
         function jumpToRoom() {
             const val = parseInt(document.getElementById('roomJumpInput').value);
             if (!isNaN(val) && val >= 1 && val <= 1000) {
@@ -287,51 +294,34 @@
             currentLevel = targetLevel;
             updateLevel();
 
-            // Активируем нужные элементы в зависимости от уровня, сохраняя предыдущие
             if (targetLevel >= 2) document.getElementById('startBtn').style.display = 'block';
-            if (targetLevel >= 2) {
-                const endBtn = document.getElementById('endBtn');
-                endBtn.style.display = 'block';
-                getRandomPosition(endBtn);
-            }
-            if (targetLevel >= 3) {
-                const hereBtn = document.getElementById('hereBtn');
-                hereBtn.style.display = 'block';
-                getRandomPosition(hereBtn);
-            }
-            if (targetLevel >= 5) {
-                document.getElementById('gridContainer').style.display = 'grid';
-            }
-            if (targetLevel >= 6) {
-                document.getElementById('addTextBtn').style.display = 'block';
-            }
-            if (targetLevel >= 7) {
-                document.getElementById('inputContainer').style.display = 'block';
-            }
-            if (targetLevel >= 8) {
-                const trashBtn = document.getElementById('trashBtn');
-                trashBtn.style.display = 'block';
-                getRandomPosition(trashBtn);
-            }
-            if (targetLevel >= 9) {
-                document.getElementById('captchaContainer').style.display = 'flex';
-            }
-            if (targetLevel >= 10) {
-                document.getElementById('questionContainer').style.display = 'block';
-            }
-            if (targetLevel >= 11) {
-                document.getElementById('gearBtn').style.display = 'block';
-            }
+            if (targetLevel >= 2) document.getElementById('endBtn').style.display = 'block';
+            if (targetLevel >= 3) document.getElementById('hereBtn').style.display = 'block';
+            if (targetLevel >= 5) document.getElementById('gridContainer').style.display = 'grid';
+            if (targetLevel >= 6) document.getElementById('addTextBtn').style.display = 'block';
+            if (targetLevel >= 7) document.getElementById('inputContainer').style.display = 'block';
+            if (targetLevel >= 8) document.getElementById('trashBtn').style.display = 'block';
+            if (targetLevel >= 9) document.getElementById('captchaContainer').style.display = 'flex';
+            if (targetLevel >= 10) document.getElementById('questionContainer').style.display = 'block';
+            if (targetLevel >= 11) document.getElementById('gearBtn').style.display = 'block';
         }
 
         // --- УРОВЕНЬ 1 -> 2 ---
         function startAction() {
+            if (startUsed) return; // Не функционирует после первого нажатия
+            startUsed = true;
+            const btn = document.getElementById('startBtn');
+            btn.classList.add('used');
+            
             goToRoom(2);
         }
 
         // --- КЛИКИ ПО END (Ур. 2) ---
         function endAction() {
+            if (endUsed) return;
             if (currentLevel === 2) {
+                endUsed = true;
+                document.getElementById('endBtn').classList.add('used');
                 goToRoom(3);
                 actionClicks = 0;
             }
@@ -339,13 +329,14 @@
 
         // --- КЛИКИ ПО HERE (Ур. 3 и 4) ---
         function hereAction() {
+            if (hereUsed) return;
             actionClicks++;
             if (currentLevel === 3 && actionClicks >= 2) {
                 goToRoom(4);
                 actionClicks = 0;
-                const hereBtn = document.getElementById('hereBtn');
-                getRandomPosition(hereBtn);
             } else if (currentLevel === 4 && actionClicks >= 3) {
+                hereUsed = true;
+                document.getElementById('hereBtn').classList.add('used');
                 goToRoom(5);
                 document.getElementById('gridContainer').style.display = 'grid';
                 startLevelFive();
@@ -380,13 +371,12 @@
         function handleInputKey(event) {
             if (event.key === 'Enter') {
                 goToRoom(8);
-                const trashBtn = document.getElementById('trashBtn');
-                getRandomPosition(trashBtn);
             }
         }
 
         // --- УРОВЕНЬ 8 (Мусорка) ---
         function openTrashModal() {
+            if (trashUsed) return;
             if (currentLevel >= 8) {
                 document.getElementById('trashModal').style.display = 'flex';
             }
@@ -394,6 +384,8 @@
 
         function resolveTrash(choice) {
             document.getElementById('trashModal').style.display = 'none';
+            trashUsed = true;
+            document.getElementById('trashBtn').classList.add('used');
             const addTextBtn = document.getElementById('addTextBtn');
 
             if (choice === 'yes') {
@@ -410,15 +402,17 @@
             document.getElementById('captchaContainer').style.display = 'flex';
         }
 
-        // --- УРОВЕНЬ 9 (Капча) ---
-        function clickRobotCheckbox() {
-            // Если нажал галочку — игра сначала
-            alert('You are a robot! Game over.');
+        // --- УРОВЕНЬ 9 (Капча кнопки) ---
+        function clickRobotCheck() {
+            // Нажал галочку — значит робот, сброс игры
+            alert('You clicked the checkmark! You are a robot. Game over.');
             resetGame();
         }
 
-        function clickInvisibleCross() {
-            // Если нажал невидимый крестик рядом — проходим в комнату 10
+        function clickRobotCross() {
+            if (captchaPassed) return;
+            captchaPassed = true;
+            // Нажал крестик — прошел дальше в 10 комнату
             goToRoom(10);
             document.getElementById('captchaContainer').style.display = 'none';
             document.getElementById('questionContainer').style.display = 'block';
@@ -427,7 +421,6 @@
         // --- УРОВЕНЬ 10 (Вопрос Hello!) ---
         function answerHello(ans) {
             if (ans === 'hi') {
-                // Переходим в 11 уровень, появляется шестеренка
                 goToRoom(11);
                 document.getElementById('questionContainer').style.display = 'none';
                 document.getElementById('gearBtn').style.display = 'block';
@@ -440,21 +433,33 @@
         // --- СБРОС ИГРЫ ---
         function resetGame() {
             currentLevel = 1;
-            updateLevel();
             actionClicks = 0;
+            startUsed = false;
+            endUsed = false;
+            hereUsed = false;
+            trashUsed = false;
+            captchaPassed = false;
+            updateLevel();
             
             document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('endBtn').style.display = 'none';
+            document.getElementById('endBtn').classList.remove('used');
+            
             document.getElementById('hereBtn').style.display = 'none';
+            document.getElementById('hereBtn').classList.remove('used');
+            
             document.getElementById('addTextBtn').style.display = 'none';
             document.getElementById('addTextBtn').style.opacity = '1';
+            
             document.getElementById('inputContainer').style.display = 'none';
+            
             document.getElementById('trashBtn').style.display = 'none';
+            document.getElementById('trashBtn').classList.remove('used');
+            
             document.getElementById('trashModal').style.display = 'none';
             document.getElementById('captchaContainer').style.display = 'none';
             document.getElementById('questionContainer').style.display = 'none';
             document.getElementById('gearBtn').style.display = 'none';
-            document.getElementById('robotCheckbox').checked = false;
             document.getElementById('roomJumpInput').value = '';
 
             for(let i=0; i<4; i++) {
@@ -463,6 +468,7 @@
 
             const startBtn = document.getElementById('startBtn');
             startBtn.style.display = 'block';
+            startBtn.classList.remove('used');
             startBtn.style.top = '50px';
             startBtn.style.left = '20px';
         }
